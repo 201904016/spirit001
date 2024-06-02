@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 
 const MapPage = () => {
-  useBackButtonToMain();
   return (
     <View>
       <View>

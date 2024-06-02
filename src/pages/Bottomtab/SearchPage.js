@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 
 const SearchPage = () => {
-  useBackButtonToMain();
   return (
     <View>
       <View>

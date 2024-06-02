@@ -13,26 +13,6 @@ import MyPage from '../pages/Bottomtab/MyPage';
 const Tab = createBottomTabNavigator();
 
 const Mainbtmbar = () => {
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        if (
-          navigation.isFocused() &&
-          navigation.getCurrentRoute().name !== 'MainPage'
-        ) {
-          navigation.navigate(MainPage);
-          return true;
-        }
-        return false;
-      },
-    );
-
-    return () => backHandler.remove();
-  }, [navigation]);
-
   return (
     <Tab.Navigator
       initialRouteName="MainPage"

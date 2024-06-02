@@ -3,7 +3,6 @@ import useBackButtonToMain from '../../components/useBackButtonToMain ';
 import {Text, View} from 'react-native';
 
 const LikePage = () => {
-  useBackButtonToMain();
   return (
     <View>
       <Text>LikePage</Text>

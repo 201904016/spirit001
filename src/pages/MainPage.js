@@ -18,6 +18,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import {useNavigation} from '@react-navigation/native';
+import MainStack from '../components/MainStack';
+import StoreaddPage from './StoreaddPage';
 
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth - 24 * 2;
@@ -25,6 +28,8 @@ const imageMargin = 20;
 const offset = imageWidth + imageMargin * 2;
 
 const MainPage = () => {
+  const navigation = useNavigation();
+
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {}, []);
@@ -47,6 +52,9 @@ const MainPage = () => {
 
   const handlestoreItemClick = index => {
     setStoreActiveIndex(index);
+    if (index === 0) {
+      navigation.navigate('StoreaddPage');
+    }
   };
 
   const handlestoreItemOut = () => {

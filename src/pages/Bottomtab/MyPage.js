@@ -6,7 +6,6 @@ import {createStackNavigator} from '@react-navigation/stack';
 import LoginStack from '../../components/LoginStack';
 
 const MyPage = () => {
-  useBackButtonToMain();
   return <LoginStack />;
 };
 

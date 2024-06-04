@@ -108,9 +108,6 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#CCCCCC', // 비활성화되었을 때 배경색
   },
-  container123: {
-    alignItems: 'center',
-  },
 });
 
 export default styles;

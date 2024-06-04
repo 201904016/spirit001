@@ -53,7 +53,7 @@ const MainPage = () => {
   const handlestoreItemClick = index => {
     setStoreActiveIndex(index);
     if (index === 0) {
-      navigation.navigate('StoreaddPage');
+      navigation.navigate(StoreaddPage);
     }
   };
 

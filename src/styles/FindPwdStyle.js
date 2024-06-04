@@ -22,6 +22,15 @@ const styles = StyleSheet.create({
     paddingRight: 50,
     paddingBottom: 16,
   },
+  linkOrange: {
+    color: '#EE414C',
+    textAlign: 'left',
+    fontSize: 11,
+    fontWeight: '200',
+    paddingLeft: 50,
+    paddingRight: 50,
+    paddingBottom: 6,
+  },
   topBold: {
     textAlign: 'left',
     fontWeight: '600',
@@ -103,7 +112,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   pwBtn2: {
-    backgroundColor: '#80D2F4',
     fontWeight: '500',
     paddingHorizontal: 110,
     paddingVertical: 10,
@@ -112,6 +120,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     marginBottom: 10,
+  },
+  activeButton: {
+    backgroundColor: '#80D2F4',
+    fontWeight: '500',
+  },
+  disabledButton: {
+    backgroundColor: '#CCCCCC', // 비활성화되었을 때 배경색
   },
 });
 

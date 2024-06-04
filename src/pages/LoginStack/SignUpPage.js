@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -9,15 +9,23 @@ import {
   View,
   Image,
   TextInput,
+  Alert,
 } from 'react-native';
 import styles from '../../styles/SignUpPageStyle';
+import LoginPage from './LoginPage';
+import {Timer} from '../../hooks/Timer';
 
-const SignUpPage = () => {
+const SignUpPage = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [verifypassword, setverifyPassword] = useState('');
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('');
   const [verifyemail, setVerifyemail] = useState('');
+  const [showPasswordError, setShowPasswordError] = useState(false);
+  const [showNicknameError, setShowNicknameError] = useState(false);
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   const handleEmailChange = text => {
     setEmail(text);
@@ -27,6 +35,9 @@ const SignUpPage = () => {
   };
   const handlpasswordChange = text => {
     setPassword(text);
+  };
+  const handlverifypasswordChange = text => {
+    setverifyPassword(text);
   };
   const handleNameChange = text => {
     setName(text);
@@ -39,7 +50,6 @@ const SignUpPage = () => {
     var data = {
       email: email,
     };
-
     fetch('http://kymokim.iptime.org:11082/api/auth/sendEmail', {
       method: 'POST',
       headers: {
@@ -50,11 +60,32 @@ const SignUpPage = () => {
       body: JSON.stringify(data),
     })
       .then(response => {
-        return response.json();
-      })
-      .then(response => {
-        console.log(response.data);
-        console.log('보냄');
+        if (response.status != 200) {
+          Alert.alert(
+            '다시 시도해 주세요',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+              },
+            ],
+            {cancelable: false},
+          );
+        } else {
+          Alert.alert(
+            '인증번호를 보냈습니다.',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+                onPress: () => setIsTimerRunning(true),
+              },
+            ],
+            {cancelable: false},
+          );
+        }
       })
       .catch(error => {
         console.error(error);
@@ -66,7 +97,6 @@ const SignUpPage = () => {
       email: email,
       verificationCode: verifyemail,
     };
-
     fetch('http://kymokim.iptime.org:11082/api/auth/verifyEmail', {
       method: 'POST',
       headers: {
@@ -77,11 +107,32 @@ const SignUpPage = () => {
       body: JSON.stringify(data),
     })
       .then(response => {
-        return response.json();
-      })
-      .then(response => {
-        console.log(response.data);
-        console.log('인증성공');
+        if (response.status != 200) {
+          Alert.alert(
+            '인증에 실패하였습니다.',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+              },
+            ],
+            {cancelable: false},
+          );
+        } else {
+          Alert.alert(
+            '인증 성공',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+                onPress: () => setIsButtonEnabled(true),
+              },
+            ],
+            {cancelable: false},
+          );
+        }
       })
       .catch(error => {
         console.error(error);
@@ -89,6 +140,32 @@ const SignUpPage = () => {
   };
 
   const SignUp = () => {
+    if (
+      email === '' ||
+      password === '' ||
+      verifypassword === '' ||
+      nickname === '' ||
+      name === ''
+    ) {
+      Alert.alert(
+        '모든 내용을 적어주세요',
+        '',
+        [
+          {
+            text: '확인',
+            style: 'destructive',
+          },
+        ],
+        {cancelable: false},
+      );
+      return;
+    }
+    if (password !== verifypassword) {
+      setShowPasswordError(true);
+      return;
+    } else {
+      setShowPasswordError(false);
+    }
     var data = {
       email: email,
       password: password,
@@ -106,11 +183,38 @@ const SignUpPage = () => {
       body: JSON.stringify(data),
     })
       .then(response => {
-        return response.json();
-      })
-      .then(response => {
-        console.log(response.data);
-        console.log('회원가입완료');
+        if (response.status !== 200) {
+          return response.json().then(errorData => {
+            if (errorData.data === 'AUTH__002') {
+              Alert.alert(
+                '존재하는 이메일입니다.',
+                '',
+                [
+                  {
+                    text: '확인',
+                    style: 'destructive',
+                  },
+                ],
+                {cancelable: false},
+              );
+            } else {
+              setShowNicknameError(true);
+            }
+          });
+        } else {
+          Alert.alert(
+            '회원가입 완료',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+                onPress: () => navigation.navigate(LoginPage),
+              },
+            ],
+            {cancelable: false},
+          );
+        }
       })
       .catch(error => {
         console.error(error);
@@ -131,12 +235,12 @@ const SignUpPage = () => {
         </View>
 
         <View style={{marginBottom: 20}}>
-          <Text style={styles.linkBold}>휴대폰번호</Text>
+          <Text style={styles.linkBold}>이메일</Text>
 
           <View style={{flexDirection: 'row'}}>
             <TextInput
               style={styles.inputPh}
-              placeholder="숫자만 입력해주세요."
+              placeholder="이메일"
               value={email}
               onChangeText={handleEmailChange}
             />
@@ -160,6 +264,7 @@ const SignUpPage = () => {
               </Text>
             </Pressable>
           </View>
+          {isTimerRunning && <Timer />}
         </View>
 
         <View style={{marginBottom: 20}}>
@@ -173,7 +278,12 @@ const SignUpPage = () => {
           <TextInput
             style={styles.input}
             placeholder="비밀번호를 다시한번 입력해주세요."
+            value={verifypassword}
+            onChangeText={handlverifypasswordChange}
           />
+          {showPasswordError && (
+            <Text style={styles.linkOrange}>비밀번호가 일치하지 않습니다.</Text>
+          )}
           <Text style={styles.linkBk}>
             영문, 숫자, 특수문자 중 2종류 이상을 조합하여 8~20자리로 설정해
             주세요.
@@ -186,10 +296,18 @@ const SignUpPage = () => {
           value={nickname}
           onChangeText={handlNicknameChange}
         />
-        <Text style={styles.linkOrange}>이미 사용중인 닉네임입니다.</Text>
+        {showNicknameError && (
+          <Text style={styles.linkOrange}>이미 사용중인 닉네임입니다.</Text>
+        )}
       </View>
       <View>
-        <Pressable style={styles.LoginButton} onPress={SignUp}>
+        <Pressable
+          style={[
+            styles.LoginButton,
+            isButtonEnabled ? styles.activeButton : styles.disabledButton,
+          ]}
+          onPress={SignUp}
+          disabled={!isButtonEnabled}>
           <Text style={{color: '#FFFFFF', fontWeight: 'bold'}}>시작하기</Text>
         </Pressable>
       </View>

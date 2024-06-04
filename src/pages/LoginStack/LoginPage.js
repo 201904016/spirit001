@@ -9,10 +9,12 @@ import {
   View,
   Image,
   TextInput,
+  Alert,
 } from 'react-native';
 import styles from '../../styles/LoginPageStyle';
 import SignUpPage from './SignUpPage';
 import FindPwdPage from './FindPwdPage';
+import {storeToken} from '../../store/Storage';
 
 const LoginPage = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -27,29 +29,63 @@ const LoginPage = ({navigation}) => {
   };
 
   const Login = () => {
-    var data = {
-      email: email,
-      password: password,
-    };
+    if (email === null || password === null) {
+      return;
+    } else {
+      var data = {
+        email: email,
+        password: password,
+      };
 
-    fetch('http://kymokim.iptime.org:11082/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors',
-      credentials: 'include',
-      body: JSON.stringify(data),
-    })
-      .then(response => {
-        return response.json();
+      fetch('http://kymokim.iptime.org:11082/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        credentials: 'include',
+        body: JSON.stringify(data),
       })
-      .then(response => {
-        console.log(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+        .then(response => {
+          if (response.status != 200) {
+            Alert.alert(
+              '이메일 및 비밀번호를 확인해 주세요',
+              '',
+              [
+                {
+                  text: '확인',
+                  style: 'destructive',
+                },
+              ],
+              {cancelable: false},
+            );
+            return;
+          } else {
+            return response.json();
+          }
+        })
+        .then(response => {
+          if (response) {
+            Alert.alert(
+              '로그인 되었습니다.',
+              '',
+              [
+                {
+                  text: '확인',
+                  style: 'destructive',
+                  onPress: () => navigation.navigate('MainPage'),
+                },
+              ],
+              {cancelable: false},
+            );
+            console.log(response.data);
+            storeToken(response.data.accessToken);
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
   };
 
   return (
@@ -65,7 +101,7 @@ const LoginPage = ({navigation}) => {
           style={styles.input}
           value={email}
           onChangeText={handleEmailChange}
-          placeholder="전화번호"
+          placeholder="email"
         />
         <TextInput
           style={styles.input}

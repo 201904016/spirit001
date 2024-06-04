@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -13,6 +13,110 @@ import {
 import styles from '../../styles/SignUpPageStyle';
 
 const SignUpPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [verifyemail, setVerifyemail] = useState('');
+
+  const handleEmailChange = text => {
+    setEmail(text);
+  };
+  const handlesetVerifyemailChange = text => {
+    setVerifyemail(text);
+  };
+  const handlpasswordChange = text => {
+    setPassword(text);
+  };
+  const handleNameChange = text => {
+    setName(text);
+  };
+  const handlNicknameChange = text => {
+    setNickname(text);
+  };
+
+  const SendEmail = () => {
+    var data = {
+      email: email,
+    };
+
+    fetch('http://kymokim.iptime.org:11082/api/auth/sendEmail', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(response => {
+        console.log(response.data);
+        console.log('보냄');
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  const VerifyEmail = () => {
+    var data = {
+      email: email,
+      verificationCode: verifyemail,
+    };
+
+    fetch('http://kymokim.iptime.org:11082/api/auth/verifyEmail', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(response => {
+        console.log(response.data);
+        console.log('인증성공');
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  const SignUp = () => {
+    var data = {
+      email: email,
+      password: password,
+      name: name,
+      nickname: nickname,
+    };
+
+    fetch('http://kymokim.iptime.org:11082/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(response => {
+        console.log(response.data);
+        console.log('회원가입완료');
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <View>
@@ -21,6 +125,8 @@ const SignUpPage = () => {
           <TextInput
             style={styles.input}
             placeholder="한글 또는 영문으로 입력해주세요."
+            value={name}
+            onChangeText={handleNameChange}
           />
         </View>
 
@@ -31,9 +137,10 @@ const SignUpPage = () => {
             <TextInput
               style={styles.inputPh}
               placeholder="숫자만 입력해주세요."
+              value={email}
+              onChangeText={handleEmailChange}
             />
-
-            <Pressable style={styles.mBtn1}>
+            <Pressable style={styles.mBtn1} onPress={SendEmail}>
               <Text style={{color: 'gray', fontWeight: '600'}}>
                 인증번호 요청
               </Text>
@@ -44,9 +151,10 @@ const SignUpPage = () => {
             <TextInput
               style={styles.inputPh}
               placeholder="인증번호를 입력해주세요."
+              value={verifyemail}
+              onChangeText={handlesetVerifyemailChange}
             />
-
-            <Pressable style={styles.mBtn2}>
+            <Pressable style={styles.mBtn2} onPress={VerifyEmail}>
               <Text style={{color: '#FFFFFF', fontWeight: 'bold'}}>
                 인증번호 확인
               </Text>
@@ -59,6 +167,8 @@ const SignUpPage = () => {
           <TextInput
             style={styles.input}
             placeholder="비밀번호를 입력해주세요."
+            value={password}
+            onChangeText={handlpasswordChange}
           />
           <TextInput
             style={styles.input}
@@ -70,11 +180,16 @@ const SignUpPage = () => {
           </Text>
         </View>
         <Text style={styles.linkBold}>닉네임</Text>
-        <TextInput style={styles.input} placeholder="닉네임을 입력해주세요." />
+        <TextInput
+          style={styles.input}
+          placeholder="닉네임을 입력해주세요."
+          value={nickname}
+          onChangeText={handlNicknameChange}
+        />
         <Text style={styles.linkOrange}>이미 사용중인 닉네임입니다.</Text>
       </View>
       <View>
-        <Pressable style={styles.LoginButton}>
+        <Pressable style={styles.LoginButton} onPress={SignUp}>
           <Text style={{color: '#FFFFFF', fontWeight: 'bold'}}>시작하기</Text>
         </Pressable>
       </View>

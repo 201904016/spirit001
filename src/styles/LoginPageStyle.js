@@ -8,13 +8,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 60,
   },
-  link: {
-    textAlign: 'center',
-    paddingLeft: 50,
-    paddingRight: 50,
-  },
+  // link: {
+  //   textAlign: 'center',
+  //   paddingLeft: 50,
+  //   paddingRight: 50,
+  // },
   separator: {
-    paddingVertical: 10,
+    fontWeight: 'bold',
+    borderColor: 'gray',
+    borderWidth: 1,
   },
   input: {
     marginLeft: 50,
@@ -26,7 +28,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   container: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
     backgroundColor: 'white',
   },
   box1: {
@@ -61,6 +64,12 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  linksContainertext: {
+    marginTop: 30,
+    flexDirection: 'row', // 수평 방향으로 요소들을 배치
+    alignItems: 'center',
+    marginHorizontal: 60,
   },
 });
 

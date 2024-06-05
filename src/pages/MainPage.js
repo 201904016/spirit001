@@ -21,15 +21,14 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import MainStack from '../components/MainStack';
 import StoreaddPage from './StoreaddPage';
+import Izakaya from './StoreList/Izakaya';
 
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth - 24 * 2;
 const imageMargin = 20;
 const offset = imageWidth + imageMargin * 2;
 
-const MainPage = () => {
-  const navigation = useNavigation();
-
+const MainPage = ({navigation}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {}, []);
@@ -42,10 +41,25 @@ const MainPage = () => {
     setIsModalVisible(false);
   };
 
-  const handleItemClick = index => {
-    if (index == 9) {
-      onPressModalOpen();
-    }
+  const catagoryClick = index => {
+    useEffect(() => {
+      if (index >= 0 && index < 9) {
+        navigation.navigate('StoreListTabbar', {screen: screens[index]});
+      } else if (index === 9) {
+        onPressModalOpen();
+      }
+    }, [index]);
+    console.log(index);
+  };
+
+  const innercatagory = indexinner => {
+    useEffect(() => {
+      // index 값이 변경될 때만 실행되도록 조건을 추가
+      if (indexinner >= 0 && indexinner < screens.length) {
+        navigation.navigate('StoreListTabbar', {screen: screens[indexinner]});
+      }
+    }, [indexinner]);
+    console.log(indexinner);
   };
 
   const [storeactiveIndex, setStoreActiveIndex] = useState(null);
@@ -92,7 +106,7 @@ const MainPage = () => {
           acc[rowIndex].push(
             <Pressable
               key={text}
-              onPress={() => handleItemClick(index)}
+              onPress={() => catagoryClick(index)}
               style={styles.catagoryinnerView}>
               <Image source={source} style={styles.catagoryimgs} />
               <Text style={styles.catagorytext}>{text}</Text>
@@ -357,19 +371,22 @@ const MainPage = () => {
           <View style={styles.modalContainer}>
             <View style={styles.modaltopview}>
               {innercategories
-                .reduce((acc, {source, text}, index) => {
-                  const rowIndex = Math.floor(index / 5);
+                .reduce((acc, {source, text}, indexinner) => {
+                  const rowIndex = Math.floor(indexinner / 5);
                   if (!acc[rowIndex]) acc[rowIndex] = [];
                   acc[rowIndex].push(
-                    <View key={text} style={styles.catagoryinnerView}>
+                    <Pressable
+                      key={text}
+                      style={styles.catagoryinnerView}
+                      onPress={() => innercatagory(indexinner)}>
                       <Image source={source} style={styles.catagoryimgs} />
                       <Text style={styles.catagorytext}>{text}</Text>
-                    </View>,
+                    </Pressable>,
                   );
                   return acc;
                 }, [])
-                .map((row, index) => (
-                  <View key={index} style={styles.catagoryView}>
+                .map((row, indexinner) => (
+                  <View key={indexinner} style={styles.catagoryView}>
                     {row}
                   </View>
                 ))}
@@ -515,6 +532,29 @@ const items = [
     closeTime: '영업종료 04:00',
     distance: '267m',
   },
+];
+
+const screens = [
+  'Izakaya',
+  'Koreafood',
+  'Westernfood',
+  'Chinesefood',
+  'Emotional',
+  'Jokbal',
+  'Steamedfood',
+  'Grilled',
+  'Chicken',
+  'Pancake',
+  'Dried',
+  'Seafood',
+  'Room',
+  'Group',
+  'Yajang',
+  'Pocha',
+  'Hope',
+  'Winebar',
+  'Cocktail',
+  'Pupbar',
 ];
 
 const styles = StyleSheet.create({

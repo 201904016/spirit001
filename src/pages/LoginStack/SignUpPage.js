@@ -11,6 +11,7 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import {useNavigation, StackActions} from '@react-navigation/native';
 import styles from '../../styles/SignUpPageStyle';
 import LoginPage from './LoginPage';
 import {Timer} from '../../hooks/Timer';

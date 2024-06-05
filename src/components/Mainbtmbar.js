@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {BackHandler} from 'react-native';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -9,10 +9,13 @@ import MapPage from '../pages/Bottomtab/MapPage';
 import MainPage from '../pages/MainPage';
 import LikePage from '../pages/Bottomtab/LikePage';
 import MyPage from '../pages/Bottomtab/MyPage';
+import LoginStack from './LoginStack';
 
 const Tab = createBottomTabNavigator();
 
 const Mainbtmbar = () => {
+  const [isLoggedIn, setLoggedIn] = useState(false);
+
   return (
     <Tab.Navigator
       initialRouteName="MainPage"
@@ -36,6 +39,8 @@ const Mainbtmbar = () => {
           } else if (route.name === 'LikePage') {
             iconName = 'heart-outline';
           } else if (route.name === 'MyPage') {
+            iconName = 'person-outline';
+          } else if (route.name === 'LoginStack') {
             iconName = 'person-outline';
           }
 
@@ -65,11 +70,20 @@ const Mainbtmbar = () => {
         component={LikePage}
         options={{tabBarLabel: '저장', headerShown: false}}
       />
-      <Tab.Screen
-        name="MyPage"
-        component={MyPage}
-        options={{tabBarLabel: '마이', headerShown: false}}
-      />
+
+      {isLoggedIn ? (
+        <Tab.Screen
+          name="MyPage"
+          component={MyPage}
+          options={{tabBarLabel: '마이', headerShown: false}}
+        />
+      ) : (
+        <Tab.Screen
+          name="LoginStack"
+          component={LoginStack}
+          options={{tabBarLabel: '마이', headerShown: false}}
+        />
+      )}
     </Tab.Navigator>
   );
 };

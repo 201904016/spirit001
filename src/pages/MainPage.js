@@ -31,8 +31,6 @@ const offset = imageWidth + imageMargin * 2;
 const MainPage = ({navigation}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  useEffect(() => {}, []);
-
   const onPressModalOpen = () => {
     setIsModalVisible(true);
   };
@@ -42,24 +40,18 @@ const MainPage = ({navigation}) => {
   };
 
   const catagoryClick = index => {
-    useEffect(() => {
-      if (index >= 0 && index < 9) {
-        navigation.navigate('StoreListTabbar', {screen: screens[index]});
-      } else if (index === 9) {
-        onPressModalOpen();
-      }
-    }, [index]);
-    console.log(index);
+    if (index >= 0 && index < 9) {
+      navigation.navigate('StoreListTabbar', {screen: screens[index]});
+    } else if (index === 9) {
+      onPressModalOpen();
+    }
   };
 
   const innercatagory = indexinner => {
-    useEffect(() => {
-      // index 값이 변경될 때만 실행되도록 조건을 추가
-      if (indexinner >= 0 && indexinner < screens.length) {
-        navigation.navigate('StoreListTabbar', {screen: screens[indexinner]});
-      }
-    }, [indexinner]);
-    console.log(indexinner);
+    if (indexinner >= 0 && indexinner < screens.length) {
+      navigation.navigate('StoreListTabbar', {screen: screens[indexinner]});
+    }
+    setIsModalVisible(false);
   };
 
   const [storeactiveIndex, setStoreActiveIndex] = useState(null);
@@ -101,9 +93,9 @@ const MainPage = ({navigation}) => {
       </View>
       {categories
         .reduce((acc, {source, text}, index) => {
-          const rowIndex = Math.floor(index / 5);
-          if (!acc[rowIndex]) acc[rowIndex] = [];
-          acc[rowIndex].push(
+          const rowIndex1 = Math.floor(index / 5);
+          if (!acc[rowIndex1]) acc[rowIndex1] = [];
+          acc[rowIndex1].push(
             <Pressable
               key={text}
               onPress={() => catagoryClick(index)}
@@ -114,8 +106,8 @@ const MainPage = ({navigation}) => {
           );
           return acc;
         }, [])
-        .map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.catagoryView}>
+        .map((row, rowIndex1) => (
+          <View key={rowIndex1} style={styles.catagoryView}>
             {row}
           </View>
         ))}

@@ -4,6 +4,7 @@ import {Pressable} from 'react-native';
 import Mainbtmbar from './Mainbtmbar';
 import StoreaddPage from '../pages/StoreaddPage';
 import StoreListTabbar from './StoreListTabbar';
+import StoreStack from './StoreStack';
 
 const Stack = createStackNavigator();
 
@@ -27,6 +28,13 @@ export default function MainStack() {
         component={StoreListTabbar}
         options={{
           title: '스피릿 둘러보기',
+        }}
+      />
+      <Stack.Screen
+        name="StoreStack"
+        component={StoreStack}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

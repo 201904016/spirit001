@@ -1,5 +1,4 @@
 import React from 'react';
-import useBackButtonToMain from '../../components/useBackButtonToMain ';
 import {Text, View} from 'react-native';
 
 const LikePage = () => {

@@ -22,6 +22,8 @@ import {useNavigation} from '@react-navigation/native';
 import MainStack from '../components/MainStack';
 import StoreaddPage from './StoreaddPage';
 import Izakaya from './CategoryList/Izakaya';
+import StoreMainpage from './StoreInner/StoreMainPage';
+import StoreStack from '../components/StoreStack';
 
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth - 24 * 2;
@@ -87,7 +89,7 @@ const MainPage = ({navigation}) => {
         />
       </View>
       <View style={styles.topdayweather}>
-        <Text style={styles.todayweathertext}>맑음 온도:22</Text>
+        <Text style={styles.todayweathertext}>맑zz음 온도:22</Text>
         <Text style={styles.todayweathertext}>강수확률:17%</Text>
         <Text style={styles.todayweathertext}>일몰시간 19:00</Text>
       </View>
@@ -257,13 +259,17 @@ const MainPage = ({navigation}) => {
       </View>
       <View>
         <ScrollView horizontal={true}>
-          <View style={styles.recentView}>
+          <Pressable
+            style={styles.recentView}
+            onPress={() =>
+              navigation.navigate(StoreStack, {screen: 'StoreMainPage'})
+            }>
             <Image
               source={require('../assets/jangan.png')}
               style={styles.recentimg}
             />
             <View style={styles.recentMainTextview}>
-              <Text style={styles.recentMainText}>장안닭갈비</Text>
+              <Text style={styles.recentMainText}>Test1</Text>
               <View style={{flexDirection: 'row'}}>
                 <Ionicons name={'star'} size={20} color={'yellow'} />
                 <Text style={styles.recentMainText}>3.7</Text>
@@ -274,7 +280,7 @@ const MainPage = ({navigation}) => {
               <Text style={styles.recenttimetext}>영업종료 02:00</Text>
               <Text style={{fontSize: 12}}>287m</Text>
             </View>
-          </View>
+          </Pressable>
           <View style={styles.recentView}>
             <Image
               source={require('../assets/jangan.png')}

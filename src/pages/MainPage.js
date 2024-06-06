@@ -78,7 +78,7 @@ const MainPage = ({navigation}) => {
         <FontAwesomeIcon name="bell-o" size={30} color="black" />
       </View>
       <View style={styles.todayPhrasesView}>
-        <Text style={styles.todayPhrases}>윤준서 병신</Text>
+        <Text style={styles.todayPhrases}>오늘의 추천</Text>
       </View>
       <View style={styles.todayimageView}>
         <Image

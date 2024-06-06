@@ -21,7 +21,7 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import MainStack from '../components/MainStack';
 import StoreaddPage from './StoreaddPage';
-import Izakaya from './StoreList/Izakaya';
+import Izakaya from './CategoryList/Izakaya';
 
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth - 24 * 2;

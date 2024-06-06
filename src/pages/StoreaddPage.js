@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginRight: 7,
   },
   storeinput: {
-    backgroundColor: 'lightgray',
+    backgroundColor: '#F2F2F2',
     borderRadius: 10,
     paddingVertical: 1,
     flex: 1,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   textarea: {
-    backgroundColor: 'lightgray',
+    backgroundColor: '#F2F2F2',
     width: '100%',
     borderRadius: 10,
     maxHeight: 200,
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   Pickerview: {
     flex: 1,
-    backgroundColor: 'lightgray',
+    backgroundColor: '#F2F2F2',
     marginHorizontal: 5,
     borderRadius: 10,
   },

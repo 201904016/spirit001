@@ -87,7 +87,7 @@ const MainPage = ({navigation}) => {
         />
       </View>
       <View style={styles.topdayweather}>
-        <Text style={styles.todayweathertext}>맑zz음 온도:22</Text>
+        <Text style={styles.todayweathertext}>맑음 온도:22</Text>
         <Text style={styles.todayweathertext}>강수확률:17%</Text>
         <Text style={styles.todayweathertext}>일몰시간 19:00</Text>
       </View>

@@ -1,9 +1,59 @@
-import React from 'react';
-import {View, Text, StyleSheet, Dimensions} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Dimensions, Pressable} from 'react-native';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import CheckBox from '@react-native-community/checkbox';
 
 const MenuaddPage = () => {
+  const [menuName, setMenuName] = useState('');
+  const [price, setPrice] = useState('');
+  const [menuContent, setMenuContent] = useState('');
+
+  const handleMenuNameChange = text => {
+    setMenuName(text);
+  };
+
+  const handlePriceChange = text => {
+    setPrice(text);
+  };
+
+  const handleMenuContentChange = text => {
+    setMenuContent(text);
+  };
+
+  const [isSelected, setIsSelected] = useState(false);
+  const handleCheckBoxChange = () => {
+    setIsSelected(!isSelected); // 선택 상태를 반전시킵니다.
+  };
+
+  const MenuAdd = () => {
+    var data = {
+      menuName: menuName,
+      price: price,
+      menuContent: menuContent,
+      storeId: 1,
+    };
+    console.log(data + 'asd');
+
+    fetch('http://kymokim.iptime.org:11082/api/menu/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -13,20 +63,38 @@ const MenuaddPage = () => {
           </View>
           <View style={styles.menuInputView}>
             <Text style={styles.menuInputText}>메뉴 이름</Text>
-            <TextInput style={styles.menuInput} />
+            <TextInput
+              style={styles.menuInput}
+              value={menuName}
+              onChangeText={handleMenuNameChange}
+              placeholder="메뉴 이름을 입력해주세요."
+            />
           </View>
           <View style={styles.menuInputView}>
             <Text style={styles.menuInputText}>메뉴 가격</Text>
-            <TextInput style={styles.menuInput} />
+            <TextInput
+              style={styles.menuInput}
+              value={price}
+              onChangeText={handlePriceChange}
+              placeholder="메뉴 가격을 입력해주세요."
+            />
           </View>
           <View style={styles.menuInputView}>
             <Text style={styles.menuText}>메뉴 소개</Text>
           </View>
           <View style={styles.menuInputView}>
-            <TextInput style={styles.textarea} />
+            <TextInput
+              style={styles.textarea}
+              value={menuContent}
+              onChangeText={handleMenuContentChange}
+              placeholder="메뉴 소개를 입력해주세요."
+            />
           </View>
           <View style={styles.checkBoxView}>
-            <CheckBox />
+            <CheckBox
+              value={isSelected} // 선택 상태를 prop으로 전달합니다.
+              onValueChange={handleCheckBoxChange} // 체크박스 변경 시 호출되는 함수를 지정합니다.
+            />
             <Text style={styles.checkBoxText}>대표 메뉴 설정</Text>
           </View>
           <View style={styles.menuAddImage}>
@@ -35,8 +103,10 @@ const MenuaddPage = () => {
           <View style={styles.menuAddButton}>
             <Text style={styles.menuAddText}>메뉴 추가</Text>
           </View>
-          <View style={styles.saveButton}>
-            <Text style={styles.saveButtonText}>작성 완료</Text>
+          <View>
+            <Pressable style={styles.saveButton} onPress={MenuAdd}>
+              <Text style={styles.saveButtonText}>작성 완료</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>

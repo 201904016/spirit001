@@ -17,7 +17,7 @@ export default function StoreStack() {
       <Stack.Screen
         name="MenuaddPage"
         component={MenuaddPage}
-        options={{headerShown: false}}
+        options={{title: '메뉴 등록하기'}}
       />
     </Stack.Navigator>
   );

@@ -39,29 +39,117 @@ const StoreaddPage = () => {
     const newSelectedValues = [...selectedValues];
     newSelectedValues[pickerIndex] = itemValue;
     setSelectedValues(newSelectedValues);
+    switch (pickerIndex) {
+      case 0:
+        setFirstcategory(itemValue);
+        break;
+      case 1:
+        setSecondcategory(itemValue);
+        break;
+      case 2:
+        setThirdcategory(itemValue);
+        break;
+      default:
+        break;
+    }
   };
 
-  const onChangeText = inputText => {
-    setText(inputText);
+  const [storeName, setStoreName] = useState('');
+  const [firstcategory, setFirstcategory] = useState(categoriesitem[0].value);
+  const [secondcategory, setSecondcategory] = useState(categoriesitem[0].value);
+  const [thirdcategory, setThirdcategory] = useState(categoriesitem[0].value);
+  const [address, setAddress] = useState('');
+  const [storeNumber, setStoreNumber] = useState('');
+  const [storeContent, setStoreContent] = useState('');
+  const [openHour, setOpenHour] = useState('');
+  const [closepenHour, setCloseHour] = useState('');
+  const [longitude, setIongitude] = useState('');
+  const [lititude, setLititude] = useState('');
+
+  const changeStoreName = text => {
+    setStoreName(text);
   };
+  const changeAddress = text => {
+    setAddress(text);
+  };
+  const changeOpenHour = text => {
+    setOpenHour(text);
+  };
+  const StoreNumber = text => {
+    setStoreNumber(text);
+  };
+  const onChangeText = inputText => {
+    setStoreContent(inputText);
+  };
+
+  const StoreAdd = () => {
+    var data = {
+      storeName: storeName,
+      firstCategory: firstcategory,
+      secondCategory: secondcategory,
+      thirdCategory: thirdcategory,
+      address: address,
+      storeNumber: storeNumber,
+      storeContent: storeContent,
+      openHour: openHour,
+    };
+
+    fetch('http://kymokim.iptime.org:11082/api/store/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token':
+          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJyb2xlIjoiUk9MRV9VU0VSIiwiZXhwIjoxNzE3NzYwODQwfQ.ru3LZWRowTsKo2ADqVbpWz7Gmq8iwVFbbyM0DoyH3FU',
+      },
+      mode: 'cors',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
   return (
     <ScrollView>
       <View style={styles.storetopview}>
         <View style={styles.storeinputview}>
           <Text style={styles.storeinputtext}>매장 이름</Text>
-          <TextInput style={styles.storeinput} />
+          <TextInput
+            style={styles.storeinput}
+            value={storeName}
+            onChangeText={changeStoreName}
+          />
         </View>
         <View style={styles.storeinputview}>
           <Text style={styles.storeinputtext}>매장 주소</Text>
-          <TextInput style={styles.storeinput} />
+          <TextInput
+            style={styles.storeinput}
+            value={address}
+            onChangeText={changeAddress}
+          />
         </View>
         <View style={styles.storeinputview}>
           <Text style={styles.storeinputtext}>영업 시간</Text>
-          <TextInput style={styles.storeinput} />
+          <TextInput
+            style={styles.storeinput}
+            value={openHour}
+            onChangeText={changeOpenHour}
+          />
         </View>
         <View style={styles.storeinputview}>
           <Text style={styles.storeinputtext}>전화 번호</Text>
-          <TextInput style={styles.storeinput} />
+          <TextInput
+            style={styles.storeinput}
+            value={storeNumber}
+            onChangeText={StoreNumber}
+          />
         </View>
         <View style={styles.storeinputview}>
           <Text style={styles.storetext}>매장 소개</Text>
@@ -71,7 +159,7 @@ const StoreaddPage = () => {
             style={styles.textarea}
             multiline
             onChangeText={onChangeText}
-            value={text}
+            value={storeContent}
           />
         </View>
         <View style={styles.storeinputview}>
@@ -154,9 +242,9 @@ const StoreaddPage = () => {
           <Text style={styles.storetext}>메뉴 사진 추가하기 (최대 5장)</Text>
         </View>
         <View></View>
-        <View style={styles.savebutton}>
+        <Pressable style={styles.savebutton} onPress={StoreAdd}>
           <Text style={styles.savebuttontext}>작성 완료</Text>
-        </View>
+        </Pressable>
       </View>
     </ScrollView>
   );

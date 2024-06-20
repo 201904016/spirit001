@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Pressable, ImageBackground, StyleSheet} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
@@ -11,6 +11,47 @@ const StoreMainPage = ({navigation}) => {
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+
+  const [storeName, setStoreName] = useState('');
+  const [category, setCategory] = useState('');
+  const [address, setAddress] = useState('');
+  const [openHour, setOpenHour] = useState('');
+  const [closepenHour, setCloseHour] = useState('');
+  const [longitude, setIongitude] = useState('');
+  const [lititude, setLititude] = useState('');
+  const [storeRate, setStoreRate] = useState('');
+  const [reviewCount, setReviewCount] = useState('');
+  const [storeLikeCount, setStoreLikeCount] = useState('');
+
+  useEffect(() => {
+    const getStoreData = () => {
+      fetch(`http://kymokim.iptime.org:11082/api/store/get/1`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token':
+            'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJyb2xlIjoiUk9MRV9VU0VSIiwiZXhwIjoxNzE3NzYwODQwfQ.ru3LZWRowTsKo2ADqVbpWz7Gmq8iwVFbbyM0DoyH3FU',
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          setStoreName(data.data.storeName);
+          setCategory(data.data.category);
+          setAddress(data.data.address);
+          setOpenHour(data.data.openHour);
+          setCloseHour(data.data.closeHour);
+          setIongitude(data.data.longitude);
+          setLititude(data.data.latitude);
+          setStoreRate(data.data.storeRate);
+          setReviewCount(data.data.reviewCount);
+          setStoreLikeCount(data.data.storeLikeCount);
+
+          console.log(data);
+        })
+        .catch(error => console.error('Error:', error));
+    };
+    getStoreData();
+  }, []);
 
   return (
     <View>
@@ -38,16 +79,20 @@ const StoreMainPage = ({navigation}) => {
         </ImageBackground>
 
         <View style={styles.Storetitleview}>
-          <Text style={styles.Storetitle}>스케줄 청담</Text>
+          <Text style={styles.Storetitle}>{storeName}</Text>
+        </View>
+        <View style={styles.Storesubtitleview}>
+          <Text style={styles.Storesubtitle}>{category}</Text>
+          <Text style={styles.Storesubtitle}>양식 주점</Text>
           <Text style={styles.Storesubtitle}>양식 주점</Text>
         </View>
         <View style={styles.RiviewView}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name={'star'} size={20} color={'yellow'} />
-            <Text style={styles.riviewtext}>4.2</Text>
+            <Text style={styles.riviewtext}>{storeRate}</Text>
           </View>
-          <Text style={styles.riviewtext}>고객 리뷰 1,105</Text>
-          <Text style={styles.riviewtext}>찜 982</Text>
+          <Text style={styles.riviewtext}>고객 리뷰 {reviewCount}</Text>
+          <Text style={styles.riviewtext}>찜 {storeLikeCount}</Text>
         </View>
         <View style={styles.titlefoodview}>
           <Text style={styles.riviewtext}>대표요리 : 파스타</Text>
@@ -71,9 +116,7 @@ const StoreMainPage = ({navigation}) => {
           </View>
         </View>
         <View style={styles.locationview}>
-          <Text style={styles.locationtext}>
-            서울 강남구 선릉로 152번길 37 1층
-          </Text>
+          <Text style={styles.locationtext}>{address}</Text>
         </View>
         <View style={styles.timeview}>
           <Text style={styles.timetextnow}>영업 중</Text>
@@ -99,11 +142,11 @@ const StoreMainPage = ({navigation}) => {
             <Text>예약</Text>
           </View>
         </View>
-      </View>
-      <View>
-        <Pressable onPress={() => navigation.navigate('MenuaddPage')}>
-          <Text>메뉴추가</Text>
-        </Pressable>
+        <View>
+          <Pressable onPress={() => navigation.navigate('MenuaddPage')}>
+            <Text>메뉴추가</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -129,7 +172,6 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   Storetitleview: {
-    width: '40%',
     justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
@@ -140,6 +182,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
+  },
+  Storesubtitleview: {
+    width: '45%',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 5,
   },
   Storesubtitle: {
     fontSize: 12,

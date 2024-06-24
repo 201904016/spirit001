@@ -153,13 +153,6 @@ const MainPage = ({navigation}) => {
             style={styles.reviewimg}
           />
         </View>
-        <View style={styles.reviewinnerView}>
-          <Text style={styles.reviewtext}>재방문</Text>
-          <Image
-            source={require('../assets/free-icon-repost-5893999.png')}
-            style={styles.reviewimg}
-          />
-        </View>
       </View>
       <View style={styles.reviewView}>
         <View style={styles.reviewinnerView}>
@@ -169,13 +162,7 @@ const MainPage = ({navigation}) => {
             style={styles.reviewimg}
           />
         </View>
-        <View style={styles.reviewinnerView}>
-          <Text style={styles.reviewtext}>별점</Text>
-          <Image
-            source={require('../assets/free-icon-money-bag-2460494.png')}
-            style={styles.reviewimg}
-          />
-        </View>
+
         <View style={styles.reviewinnerView}>
           <Text style={styles.reviewtext}>재방문</Text>
           <Image
@@ -191,6 +178,7 @@ const MainPage = ({navigation}) => {
         <FlatList
           data={imageSources}
           horizontal
+          showsHorizontalScrollIndicator={false}
           keyExtractor={(_item, index) => index.toString()}
           renderItem={({item}) => (
             <Image source={item} style={styles.mylocationliveimgimg} />
@@ -211,6 +199,7 @@ const MainPage = ({navigation}) => {
       <View>
         <ScrollView
           horizontal={true}
+          showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollViewContent}>
           {items.map((item, index) => (
             <View key={index} style={styles.backimageview}>
@@ -234,6 +223,7 @@ const MainPage = ({navigation}) => {
       <View>
         <ScrollView
           horizontal={true}
+          showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollViewContent}>
           {items.map((item, index) => (
             <View key={index} style={styles.backimageview}>
@@ -258,7 +248,7 @@ const MainPage = ({navigation}) => {
         <Text style={styles.mylocationlivetext}>최근 방문한 장소</Text>
       </View>
       <View>
-        <ScrollView horizontal={true}>
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
           <Pressable
             style={styles.recentView}
             onPress={() =>
@@ -663,6 +653,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
   },
   reviewinnerView: {
+    flex: 1,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'lightgray',
@@ -670,6 +661,7 @@ const styles = StyleSheet.create({
     width: '30%',
     padding: 7,
     marginTop: 20,
+    marginHorizontal: 20,
   },
   reviewtext: {
     color: 'black',

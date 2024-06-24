@@ -4,6 +4,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MenuaddPage from './MenuaddPage';
+import StoreMenuPage from './StoreMenuPage';
+import StoreRiviewPage from './StoreRiviewPage';
+import StoreMapPage from './StoreMapPage';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const StoreMainPage = ({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -22,6 +26,11 @@ const StoreMainPage = ({navigation}) => {
   const [storeRate, setStoreRate] = useState('');
   const [reviewCount, setReviewCount] = useState('');
   const [storeLikeCount, setStoreLikeCount] = useState('');
+  const [currentPage, setCurrentPage] = useState('RestLivePage');
+
+  const changePage = page => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     const getStoreData = () => {
@@ -54,7 +63,7 @@ const StoreMainPage = ({navigation}) => {
   }, []);
 
   return (
-    <View>
+    <ScrollView>
       <View style={styles.StoreTopView}>
         <ImageBackground
           source={require('../../assets/MainPagetodayimg.png')}
@@ -142,21 +151,50 @@ const StoreMainPage = ({navigation}) => {
             <Text>예약</Text>
           </View>
         </View>
-        <View>
-          <Pressable onPress={() => navigation.navigate('MenuaddPage')}>
-            <Text>메뉴추가</Text>
-          </Pressable>
-        </View>
       </View>
-    </View>
+      <View style={styles.Storeinnercategory}>
+        <Pressable
+          style={styles.StoreButton}
+          onPress={() => changePage('StoreMenuPage')}>
+          <Text style={styles.StoreButtonText}>메뉴</Text>
+        </Pressable>
+        <Pressable
+          style={styles.StoreButton}
+          onPress={() => changePage('StoreRiviewPage')}>
+          <Text style={styles.StoreButtonText}>리뷰</Text>
+        </Pressable>
+        <Pressable
+          style={styles.StoreButton}
+          onPress={() => changePage('StoreMapPage')}>
+          <Text style={styles.StoreButtonText}>길찾기</Text>
+        </Pressable>
+      </View>
+
+      <View>
+        {currentPage === 'StoreMenuPage' && (
+          <StoreMenuPage navigation={navigation} />
+        )}
+        {currentPage === 'StoreRiviewPage' && (
+          <StoreRiviewPage navigation={navigation} />
+        )}
+        {currentPage === 'StoreMapPage' && (
+          <StoreMapPage navigation={navigation} />
+        )}
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   StoreTopView: {
     width: '100%',
-    height: '100%',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'black',
+    borderTopWidth: 0,
+    borderRadius: 10,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
   backimage: {
     width: '100%',
@@ -267,6 +305,31 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#5F5F5F',
+    marginBottom: 2,
+  },
+  Storeinnercategory: {
+    flexDirection: 'row',
+    marginTop: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 10,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderBottomWidth: 0,
+    justifyContent: 'space-between',
+  },
+  StoreButton: {
+    flex: 1,
+    paddingHorizontal: 45,
+    paddingTop: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+  },
+  StoreButtonText: {
+    fontSize: 15,
+    color: 'black',
+    fontWeight: '400',
   },
 });
 

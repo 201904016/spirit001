@@ -23,6 +23,8 @@ target 'spirit001' do
 
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+  pod 'react-native-geolocation-service', :path => '../node_modules/react-native-geolocation-service'
+
   target 'spirit001Tests' do
     inherit! :complete
     # Pods for testing

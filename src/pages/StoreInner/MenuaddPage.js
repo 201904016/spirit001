@@ -20,7 +20,7 @@ const MenuaddPage = () => {
     setMenuContent(text);
   };
 
-  const [isSelected, setIsSelected] = useState(false);
+  const [isSelgitected, setIsSelected] = useState(false);
   const handleCheckBoxChange = () => {
     setIsSelected(!isSelected); // 선택 상태를 반전시킵니다.
   };

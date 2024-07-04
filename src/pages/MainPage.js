@@ -193,7 +193,7 @@ const MainPage = ({navigation}) => {
       </View>
       <View style={styles.todayPhrasesView}>
         <Text style={styles.mylocationlivetext}>
-        asd
+          2~4인 가볍게 2차로 추전 드려요
         </Text>
       </View>
       <View>

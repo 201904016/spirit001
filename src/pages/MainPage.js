@@ -15,6 +15,8 @@ import {
   Modal,
   Touchable,
   TouchableOpacity,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
@@ -25,13 +27,65 @@ import Izakaya from './CategoryList/Izakaya';
 import StoreMainpage from './StoreInner/StoreMainPage';
 import StoreStack from '../components/StoreStack';
 
+import Geolocation from '@react-native-community/geolocation';
+import axios from 'axios';
+
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth - 24 * 2;
 const imageMargin = 20;
 const offset = imageWidth + imageMargin * 2;
 
 const MainPage = ({navigation}) => {
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'This app needs access to your location.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('You can use the location');
+          fetchLocation(); // 권한 허용 후 위치 가져오기
+        } else {
+          console.log('Location permission denied');
+          setError('위치 권한이 거부되었습니다.');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    } else {
+      fetchLocation(); // iOS에서는 권한 요청 없이 바로 위치 가져오기
+    }
+  };
+
+  const fetchLocation = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setLocation({latitude, longitude});
+        setError(null);
+      },
+      error => {
+        console.error(error);
+        setError(error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  };
 
   const onPressModalOpen = () => {
     setIsModalVisible(true);
@@ -67,6 +121,30 @@ const MainPage = ({navigation}) => {
 
   const handlestoreItemOut = () => {
     setStoreActiveIndex(null);
+
+    var data = {
+      longitude: location.longitude,
+      latitude: location.latitude,
+    };
+
+    fetch('http://kymokim.iptime.org:11082/api/main', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
   };
 
   return (
@@ -93,6 +171,19 @@ const MainPage = ({navigation}) => {
         <Text style={styles.todayweathertext}>강수확률:17%</Text>
         <Text style={styles.todayweathertext}>일몰시간 19:00</Text>
       </View>
+      {location && (
+        <View style={styles.topdayweather}>
+          <Text style={styles.todayweathertext}>
+            Latitude: {location.latitude.toFixed(6)}, Longitude:{' '}
+            {location.longitude.toFixed(6)}
+          </Text>
+        </View>
+      )}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+        </View>
+      )}
       {categories
         .reduce((acc, {source, text}, index) => {
           const rowIndex1 = Math.floor(index / 5);

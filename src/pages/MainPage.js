@@ -39,10 +39,23 @@ const MainPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [weather, setWeather] = useState({
+    temp: 0,
+    condition: '',
+    rain_probability: 0,
+  });
 
   useEffect(() => {
     requestLocationPermission();
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      fetchWeatherData(location.latitude, location.longitude).then(() => {
+        mainInfoSend();
+      });
+    }
+  }, [location]);
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -121,13 +134,20 @@ const MainPage = ({navigation}) => {
 
   const handlestoreItemOut = () => {
     setStoreActiveIndex(null);
+  };
 
+  const mainInfoSend = () => {
     var data = {
       longitude: location.longitude,
       latitude: location.latitude,
+      temp: weather.temp,
+      condition: weather.condition,
+      rain_probability: weather.rain_probability,
     };
 
-    fetch('http://kymokim.iptime.org:11082/api/main', {
+    console.log(data);
+
+    fetch('http://kymokim.iptime.org:11082/api/mainInfo', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -145,6 +165,23 @@ const MainPage = ({navigation}) => {
       .catch(error => {
         console.error(error);
       });
+  };
+
+  const fetchWeatherData = async (latitude, longitude) => {
+    const API_KEY = 'be107a3be29e95b54b2fac69f2a42431';
+    const apiUrl = `http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`;
+
+    try {
+      const response = await axios.get(apiUrl);
+
+      const temp = response.data.main.temp;
+      const condition = response.data.weather[0].main;
+      const rain_probability = response.data.clouds.all;
+
+      setWeather({temp, condition, rain_probability});
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
   };
 
   return (
@@ -166,19 +203,26 @@ const MainPage = ({navigation}) => {
           style={styles.todayimage}
         />
       </View>
-      <View style={styles.topdayweather}>
-        <Text style={styles.todayweathertext}>맑zz음 온도:22</Text>
-        <Text style={styles.todayweathertext}>강수확률:17%</Text>
-        <Text style={styles.todayweathertext}>일몰시간 19:00</Text>
-      </View>
-      {location && (
+      {weather.condition !== 0 && (
+        <View style={styles.topdayweather}>
+          <Text style={styles.todayweathertext}>
+            현재 온도: {weather.temp}°C
+          </Text>
+
+          <Text style={styles.todayweathertext}>날씨: {weather.condition}</Text>
+          <Text style={styles.todayweathertext}>
+            강수 확률: {weather.rain_probability}%
+          </Text>
+        </View>
+      )}
+      {/* {location && (
         <View style={styles.topdayweather}>
           <Text style={styles.todayweathertext}>
             Latitude: {location.latitude.toFixed(6)}, Longitude:{' '}
             {location.longitude.toFixed(6)}
           </Text>
         </View>
-      )}
+      )} */}
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {error}</Text>

@@ -1,11 +1,11 @@
-import React, {useEffect} from 'react';
-import {View, Text} from 'react-native';
-import {KakaoMapView} from 'react-kakao-maps';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
+import axios from 'axios';
 
 const Test1 = () => {
   return (
-    <View style={{flex: 1}}>
-      <Text>안녕</Text>
+    <View>
+      <Text>Weather Information</Text>
     </View>
   );
 };

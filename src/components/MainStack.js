@@ -1,10 +1,14 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
 import {Pressable} from 'react-native';
 import Mainbtmbar from './Mainbtmbar';
 import StoreaddPage from '../pages/StoreaddPage';
 import StoreListTabbar from './StoreListTabbar';
 import StoreStack from './StoreStack';
+import MapStack from './MapStack';
+import Test1 from '../pages/Test1';
+import AddressSearchPage from '../pages/AddressSearchPage';
 
 const Stack = createStackNavigator();
 
@@ -36,6 +40,19 @@ export default function MainStack() {
         options={{
           headerShown: false,
         }}
+      />
+      <Stack.Screen
+        name="MapStack"
+        component={MapStack}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen name="Test1" component={Test1} options={{title: 'TEST'}} />
+      <Stack.Screen
+        name="AddressSearchPage"
+        component={AddressSearchPage}
+        options={{title: '주소 검색'}}
       />
     </Stack.Navigator>
   );

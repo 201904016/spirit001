@@ -10,10 +10,19 @@ import {
   Platform,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
+import axios from 'axios';
+import Test1 from '../Test1';
 
-const MapPage = () => {
+const MapPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
+  const [weather, setWeather] = useState({
+    temp: 0,
+    condition: '',
+    temp_max: 0,
+    temp_min: 0,
+    rain_probability: 0,
+  });
 
   useEffect(() => {
     requestLocationPermission();
@@ -52,6 +61,7 @@ const MapPage = () => {
       position => {
         const {latitude, longitude} = position.coords;
         setLocation({latitude, longitude});
+        fetchWeatherData(latitude, longitude);
         setError(null);
       },
       error => {
@@ -60,11 +70,35 @@ const MapPage = () => {
       },
       {
         enableHighAccuracy: true,
-        distanceFilter: 10,
-        interval: 10000,
-        fastestInterval: 5000,
+        distanceFilter: 1,
+        interval: 5000,
+        fastestInterval: 2000,
       },
     );
+  };
+
+  const fetchWeatherData = async (latitude, longitude) => {
+    const API_KEY = 'be107a3be29e95b54b2fac69f2a42431';
+    const apiUrl = `http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`;
+
+    try {
+      const response = await axios.get(apiUrl);
+      const temp = response.data.main.temp;
+      const condition = response.data.weather[0].main;
+      const temp_max = response.data.main.temp_max;
+      const temp_min = response.data.main.temp_min;
+      const rain_probability = response.data.clouds.all;
+
+      setWeather({
+        temp,
+        condition,
+        temp_max,
+        temp_min,
+        rain_probability,
+      });
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
   };
 
   return (
@@ -75,7 +109,7 @@ const MapPage = () => {
         <View style={styles.buttonContainer}>
           <Pressable
             style={styles.locationButton}
-            onPress={requestLocationPermission}>
+            onPress={() => navigation.navigate(Test1)}>
             <Text style={styles.locationText}>위치 정보 가져오기</Text>
           </Pressable>
         </View>
@@ -84,6 +118,21 @@ const MapPage = () => {
             <Text style={styles.locationText2}>
               Latitude: {location.latitude.toFixed(6)}, Longitude:{' '}
               {location.longitude.toFixed(6)}
+            </Text>
+          </View>
+        )}
+        {weather.temp !== 0 && (
+          <View style={styles.weatherContainer}>
+            <Text style={styles.weatherText}>현재 온도: {weather.temp}°C</Text>
+            <Text style={styles.weatherText}>날씨: {weather.condition}</Text>
+            <Text style={styles.weatherText}>
+              최고 기온: {weather.temp_max}°C
+            </Text>
+            <Text style={styles.weatherText}>
+              최저 기온: {weather.temp_min}°C
+            </Text>
+            <Text style={styles.weatherText}>
+              강수 확률: {weather.rain_probability}%
             </Text>
           </View>
         )}
@@ -128,6 +177,14 @@ const styles = StyleSheet.create({
   locationContainer: {
     marginTop: 20,
     paddingHorizontal: 20,
+  },
+  weatherContainer: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  weatherText: {
+    fontSize: 18,
+    marginBottom: 10,
   },
   errorContainer: {
     marginTop: 20,

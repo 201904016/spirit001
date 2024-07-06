@@ -13,11 +13,12 @@ import {
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import CheckBox from '@react-native-community/checkbox';
+import AddressSearchPage from './AddressSearchPage';
 
 const {width: screenWidth} = Dimensions.get('window');
 const screenWidth90Percent = screenWidth * 0.9;
 
-const StoreaddPage = () => {
+const StoreaddPage = ({navigation, route}) => {
   const [text, setText] = useState('');
 
   const [selectedValues, setSelectedValues] = useState(
@@ -58,19 +59,23 @@ const StoreaddPage = () => {
   const [firstcategory, setFirstcategory] = useState(categoriesitem[0].value);
   const [secondcategory, setSecondcategory] = useState(categoriesitem[0].value);
   const [thirdcategory, setThirdcategory] = useState(categoriesitem[0].value);
-  const [address, setAddress] = useState('');
+  const {address = '', coords = {latitude: 0, longitude: 0}} =
+    route.params || {};
+
+  const [detailedAddress, setDetailedAddress] = useState('');
   const [storeNumber, setStoreNumber] = useState('');
   const [storeContent, setStoreContent] = useState('');
   const [openHour, setOpenHour] = useState('');
   const [closepenHour, setCloseHour] = useState('');
-  const [longitude, setIongitude] = useState('');
-  const [lititude, setLititude] = useState('');
 
   const changeStoreName = text => {
     setStoreName(text);
   };
   const changeAddress = text => {
     setAddress(text);
+  };
+  const changeDetailedAddress = text => {
+    setDetailedAddress(text);
   };
   const changeOpenHour = text => {
     setOpenHour(text);
@@ -89,9 +94,13 @@ const StoreaddPage = () => {
       secondCategory: secondcategory,
       thirdCategory: thirdcategory,
       address: address,
+      detailedAddress: detailedAddress,
       storeNumber: storeNumber,
       storeContent: storeContent,
       openHour: openHour,
+      longitude: coords.longitude,
+      latitude: coords.latitude,
+      detailedAddress: detailedAddress,
     };
 
     fetch('http://kymokim.iptime.org:11082/api/store/create', {
@@ -133,6 +142,22 @@ const StoreaddPage = () => {
             style={styles.storeinput}
             value={address}
             onChangeText={changeAddress}
+          />
+
+          <Pressable
+            style={styles.searchbutton}
+            onPress={() => navigation.navigate(AddressSearchPage)}>
+            <Text style={styles.locationText}>주소 검색</Text>
+          </Pressable>
+        </View>
+        <Text>위도: {coords.latitude}</Text>
+        <Text>경도: {coords.longitude}</Text>
+        <View style={styles.storeinputview}>
+          <Text style={styles.storeinputtext}>상세 주소</Text>
+          <TextInput
+            style={styles.storeinput}
+            value={detailedAddress}
+            onChangeText={changeDetailedAddress}
           />
         </View>
         <View style={styles.storeinputview}>
@@ -353,6 +378,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 18,
+  },
+  searchbutton: {
+    alignItems: 'center',
+    width: '20%',
+    marginVertical: 7,
+    backgroundColor: '#16BBFF',
+    paddingVertical: 5,
+    borderRadius: 10,
+    marginLeft: 10,
   },
 });
 

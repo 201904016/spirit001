@@ -1,20 +1,22 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   SafeAreaView,
-  StatusBar,
   StyleSheet,
-  Text,
-  Pressable,
-  View,
-  PermissionsAndroid,
   Platform,
+  PermissionsAndroid,
+  Pressable,
+  Text,
+  View,
 } from 'react-native';
+import {WebView} from 'react-native-webview';
 import Geolocation from '@react-native-community/geolocation';
-import Test1 from '../Test1';
+import SearchPage from './SearchPage';
 
 const MapPage = ({navigation}) => {
-  const [location, setLocation] = useState(null);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
   const [error, setError] = useState(null);
+  const webViewRef = useRef(null);
 
   useEffect(() => {
     requestLocationPermission();
@@ -52,53 +54,94 @@ const MapPage = ({navigation}) => {
     Geolocation.getCurrentPosition(
       position => {
         const {latitude, longitude} = position.coords;
-        setLocation({latitude, longitude});
+        setLatitude(latitude);
+        setLongitude(longitude);
         setError(null);
+        updateMap(latitude, longitude); // 위치 정보 업데이트 후 지도 갱신
       },
       error => {
         console.error(error);
-        setError(error.message);
+        if (error.code === 1) {
+          setError('위치 권한이 거부되었습니다.');
+        } else if (error.code === 2) {
+          setError('위치 정보를 사용할 수 없습니다.');
+        } else if (error.code === 3) {
+          setError('위치 요청이 시간 초과되었습니다.');
+        } else if (error.code === 4) {
+          setError('위치 서비스가 비활성화되었습니다.');
+        } else {
+          setError('알 수 없는 오류가 발생했습니다.');
+        }
       },
       {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
     );
   };
 
-  const onRefreshLocation = () => {
-    fetchLocation(); // "내 위치 갱신" 버튼 클릭 시 위치 업데이트
+  const updateLocation = () => {
+    fetchLocation();
   };
 
+  const updateMap = (lat, lng) => {
+    if (webViewRef.current) {
+      const injectJavaScript = `
+        var mapContainer = document.getElementById('map');
+        var options = {
+          center: new kakao.maps.LatLng(${lat}, ${lng}),
+          level: 3
+        };
+        var map = new kakao.maps.Map(mapContainer, options);
+
+        var markerPosition = new kakao.maps.LatLng(${lat}, ${lng});
+        var marker = new kakao.maps.Marker({
+          position: markerPosition
+        });
+
+        marker.setMap(map);
+      `;
+      webViewRef.current.injectJavaScript(injectJavaScript);
+    }
+  };
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Kakao Map</title>
+      <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f5e6db800b171aa75ab189e0c334c74a"></script>
+      <style>
+        #map {
+          width: 100%;
+          height: 100vh;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="map"></div>
+    </body>
+    </html>
+  `;
+
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.container}>
-        <Pressable
-          style={styles.locationButton}
-          onPress={onRefreshLocation} // "내 위치 갱신" 버튼 클릭 시 호출
-        >
-          <Text style={styles.locationText}>내 위치 갱신</Text>
-        </Pressable>
-        <Text style={styles.title}>지도 페이지</Text>
-        <View style={styles.buttonContainer}>
-          <Pressable
-            style={styles.locationButton}
-            onPress={() => navigation.navigate(Test1)}>
-            <Text style={styles.locationText}>위치 정보 가져오기</Text>
-          </Pressable>
-        </View>
-        {location && (
-          <View style={styles.locationContainer}>
-            <Text style={styles.locationText2}>
-              Latitude: {location.latitude.toFixed(6)}, Longitude:{' '}
-              {location.longitude.toFixed(6)}
-            </Text>
-          </View>
-        )}
-        {error && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>Error: {error}</Text>
-          </View>
-        )}
-      </View>
+    <SafeAreaView style={styles.container}>
+      <WebView
+        ref={webViewRef}
+        originWhitelist={['*']}
+        source={{html}}
+        style={styles.webview}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+      />
+      <Pressable
+        style={styles.buttonTop}
+        onPress={() => navigation.navigate(SearchPage)}>
+        <Text style={styles.buttonTextTop}>장소, 지역 검색</Text>
+      </Pressable>
+      <Pressable style={styles.buttonBottom} onPress={updateLocation}>
+        <Text style={styles.buttonText}>내 위치</Text>
+      </Pressable>
     </SafeAreaView>
   );
 };
@@ -106,42 +149,51 @@ const MapPage = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  webview: {
+    flex: 1,
+  },
+  buttonTop: {
+    position: 'absolute',
+    top: '3%',
+    left: '5%',
+    backgroundColor: '#ffffff',
+    padding: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    width: '90%',
+    height: 50,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 10,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  buttonBottom: {
+    position: 'absolute',
+    bottom: '30%',
+    left: '5%',
+    backgroundColor: '#16BBFF',
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 100,
+    width: 70,
+    height: 50,
   },
-  buttonContainer: {
-    marginBottom: 20,
-  },
-  locationButton: {
-    backgroundColor: 'black',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  locationText: {
+  buttonText: {
     color: 'white',
-    textAlign: 'center',
+    fontSize: 16,
   },
-  locationText2: {
+  buttonTextTop: {
     color: 'black',
-    textAlign: 'center',
-  },
-  locationContainer: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  errorContainer: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
+    backgroundColor: 'white',
+    fontSize: 16,
+    borderRadius: 100,
+    width: '100%',
+    left: '3%',
+    textAlign: 'left',
   },
 });
 

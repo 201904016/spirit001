@@ -9,6 +9,7 @@ import StoreStack from './StoreStack';
 import MapStack from './MapStack';
 import Test1 from '../pages/Test1';
 import AddressSearchPage from '../pages/AddressSearchPage';
+import SearchPage from '../pages/Bottomtab/SearchPage';
 
 const Stack = createStackNavigator();
 
@@ -44,6 +45,13 @@ export default function MainStack() {
       <Stack.Screen
         name="MapStack"
         component={MapStack}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SearchPage"
+        component={SearchPage}
         options={{
           headerShown: false,
         }}

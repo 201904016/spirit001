@@ -58,6 +58,30 @@ const MapPage = ({navigation}) => {
         setLongitude(longitude);
         setError(null);
         updateMap(latitude, longitude); // 위치 정보 업데이트 후 지도 갱신
+
+        var data = {
+          longitude: longitude,
+          latitude: latitude,
+        };
+        console.log(data);
+        fetch('http://kymokim.iptime.org:11082/api/location', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          mode: 'cors',
+          credentials: 'include',
+          body: JSON.stringify(data),
+        })
+          .then(response => {
+            return response.json();
+          })
+          .then(data => {
+            console.log(data);
+          })
+          .catch(error => {
+            console.error(error);
+          });
       },
       error => {
         console.error(error);

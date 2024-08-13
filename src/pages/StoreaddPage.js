@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -14,12 +14,26 @@ import {
 import {Picker} from '@react-native-picker/picker';
 import CheckBox from '@react-native-community/checkbox';
 import AddressSearchPage from './AddressSearchPage';
+import {getToken} from '../store/Storage';
 
 const {width: screenWidth} = Dimensions.get('window');
 const screenWidth90Percent = screenWidth * 0.9;
 
 const StoreaddPage = ({navigation, route}) => {
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const savedToken = await getToken();
+      setToken(savedToken);
+    };
+
+    fetchToken();
+  }, []);
+
   const [text, setText] = useState('');
+
+  console.log(token);
 
   const [selectedValues, setSelectedValues] = useState(
     Array.from({length: 3}, () => categoriesitem[0].value),
@@ -107,8 +121,7 @@ const StoreaddPage = ({navigation, route}) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-auth-token':
-          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJyb2xlIjoiUk9MRV9VU0VSIiwiZXhwIjoxNzE3NzYwODQwfQ.ru3LZWRowTsKo2ADqVbpWz7Gmq8iwVFbbyM0DoyH3FU',
+        'x-auth-token': token,
       },
       mode: 'cors',
       credentials: 'include',

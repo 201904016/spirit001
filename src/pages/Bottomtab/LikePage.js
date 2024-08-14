@@ -3,12 +3,11 @@ import {View, Text, FlatList, StyleSheet, Pressable, Image} from 'react-native';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import {getToken} from '../../store/Storage';
 import {ScrollView} from 'react-native-gesture-handler';
-import Categorytrans from '../../hooks/Categorytrans';
+import MapCategory from '../../hooks/MapCategory';
 
 const LikePage = () => {
   const [token, setToken] = useState(null);
   const [stores, setStores] = useState([]);
-  const [categorys, setCategorys] = useState([]);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -49,8 +48,8 @@ const LikePage = () => {
   return (
     <View style={styles.container}>
       <ScrollView>
-        {stores.map(store => (
-          <Pressable key={store.id}>
+        {stores.map((store, index) => (
+          <Pressable key={index}>
             <View style={styles.storeInfo}>
               <Image
                 source={require('../../assets/kim.png')}
@@ -70,15 +69,13 @@ const LikePage = () => {
                   </View>
                 </View>
                 <View style={styles.StoreCategoryList}>
-                  <Text style={styles.StoreCategory}>
-                    {store.categories[0]}
-                  </Text>
-                  <Text style={styles.StoreCategory}>
-                    {store.categories[1]}
-                  </Text>
-                  <Text style={styles.StoreCategory}>
-                    {store.categories[2]}
-                  </Text>
+                  {store.categories.slice(0, 3).map((category, index) => (
+                    <MapCategory
+                      key={index}
+                      categories={[category]}
+                      style={styles.StoreCategory}
+                    />
+                  ))}
                 </View>
                 <Text style={styles.StoreClose}>
                   영업 종료 {store.closeHour}

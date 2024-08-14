@@ -15,10 +15,12 @@ import styles from '../../styles/LoginPageStyle';
 import SignUpPage from './SignUpPage';
 import FindPwdPage from './FindPwdPage';
 import {storeToken} from '../../store/Storage';
+import {useAuth} from '../../context/AuthContext';
 
 const LoginPage = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const {setLoggedIn} = useAuth();
 
   const handleEmailChange = text => {
     setEmail(text);
@@ -73,13 +75,16 @@ const LoginPage = ({navigation}) => {
                 {
                   text: '확인',
                   style: 'destructive',
-                  onPress: () => navigation.navigate('MainPage'),
+                  onPress: () => {
+                    storeToken(response.data.accessToken);
+                    setLoggedIn(true); // 로그인 상태 true로 설정
+                    navigation.navigate('MainPage');
+                  },
                 },
               ],
               {cancelable: false},
             );
             console.log(response.data);
-            storeToken(response.data.accessToken);
           }
         })
         .catch(error => {

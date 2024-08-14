@@ -10,6 +10,7 @@ import MapStack from './MapStack';
 import Test1 from '../pages/Test1';
 import AddressSearchPage from '../pages/AddressSearchPage';
 import SearchPage from '../pages/Bottomtab/SearchPage';
+import ProfileStack from './ProfileStack';
 
 const Stack = createStackNavigator();
 
@@ -61,6 +62,13 @@ export default function MainStack() {
         name="AddressSearchPage"
         component={AddressSearchPage}
         options={{title: '주소 검색'}}
+      />
+      <Stack.Screen
+        name="ProfileStack"
+        component={ProfileStack}
+        options={{
+          headerShown: false,
+        }}
       />
     </Stack.Navigator>
   );

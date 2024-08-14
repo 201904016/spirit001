@@ -4,14 +4,17 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import Mainbtmbar from './src/components/Mainbtmbar';
 import MainStack from './src/components/MainStack';
+import {AuthProvider} from './src/context/AuthContext';
 
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <MainStack />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <MainStack />
+      </NavigationContainer>
+    </AuthProvider>
   );
 };
 

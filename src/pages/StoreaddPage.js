@@ -33,21 +33,32 @@ const StoreaddPage = ({navigation, route}) => {
 
   const [text, setText] = useState('');
 
-  console.log(token);
-
   const [selectedValues, setSelectedValues] = useState(
     Array.from({length: 3}, () => categoriesitem[0].value),
   );
 
   const [selectedOption, setSelectedOption] = useState(null);
   const [selectedscreenOption, setselectedscreenOption] = useState(null);
+  const [selectedclosedday, setselectedclosedday] = useState(null);
 
   const handleCheckBoxChange = index => {
-    setSelectedOption(index);
+    if (index === 0) {
+      setSelectedOption(true);
+    } else {
+      setSelectedOption(false);
+    }
   };
 
   const handleCheckBoxscreenChange = index => {
-    setselectedscreenOption(index);
+    if (index == 0) {
+      setselectedscreenOption(true);
+    } else {
+      setselectedscreenOption(false);
+    }
+  };
+
+  const handleclosedday = index => {
+    setselectedclosedday(index);
   };
 
   const handleValueChange = (itemValue, itemIndex, pickerIndex) => {
@@ -79,8 +90,10 @@ const StoreaddPage = ({navigation, route}) => {
   const [detailedAddress, setDetailedAddress] = useState('');
   const [storeNumber, setStoreNumber] = useState('');
   const [storeContent, setStoreContent] = useState('');
-  const [openHour, setOpenHour] = useState('');
-  const [closepenHour, setCloseHour] = useState('');
+  const [selectedOpenHour, setSelectedOpenHour] = useState(null);
+  const [selectedOpenMinute, setSelectedOpenMinute] = useState(null);
+  const [selectedClosedHour, setSelectedClosedHour] = useState(null);
+  const [selectedClosedMinute, setSelectedClosedMinute] = useState(null);
 
   const changeStoreName = text => {
     setStoreName(text);
@@ -91,8 +104,17 @@ const StoreaddPage = ({navigation, route}) => {
   const changeDetailedAddress = text => {
     setDetailedAddress(text);
   };
-  const changeOpenHour = text => {
-    setOpenHour(text);
+  const changeopenhour = text => {
+    setSelectedOpenHour(text);
+  };
+  const changeopenminute = text => {
+    setSelectedOpenMinute(text);
+  };
+  const changeclosehour = text => {
+    setSelectedClosedHour(text);
+  };
+  const changecloseminute = text => {
+    setSelectedClosedMinute(text);
   };
   const StoreNumber = text => {
     setStoreNumber(text);
@@ -111,10 +133,12 @@ const StoreaddPage = ({navigation, route}) => {
       detailedAddress: detailedAddress,
       storeNumber: storeNumber,
       storeContent: storeContent,
-      openHour: openHour,
+      openHour: selectedOpenHour + ':' + selectedOpenMinute,
+      closeHour: selectedClosedHour + ':' + selectedClosedMinute,
+      hasScreen: selectedscreenOption,
+      isGroupAvailable: selectedOption,
       longitude: coords.longitude,
       latitude: coords.latitude,
-      detailedAddress: detailedAddress,
     };
 
     fetch('http://kymokim.iptime.org:11082/api/store/create', {
@@ -175,11 +199,76 @@ const StoreaddPage = ({navigation, route}) => {
         </View>
         <View style={styles.storeinputview}>
           <Text style={styles.storeinputtext}>영업 시간</Text>
-          <TextInput
-            style={styles.storeinput}
-            value={openHour}
-            onChangeText={changeOpenHour}
-          />
+        </View>
+        <View style={styles.storeinputview}>
+          <Text style={styles.pikertext}>시작</Text>
+          <View style={styles.Pickerview}>
+            <Picker
+              selectedValue={selectedOpenHour}
+              onValueChange={itemValue => changeopenhour(itemValue)}
+              mode="dropdown"
+              style={styles.Pickeritems}>
+              {TimeHour.map((item, index) => (
+                <Picker.Item
+                  key={index}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </Picker>
+          </View>
+          <Text style={styles.pikertext}>시</Text>
+          <View style={styles.Pickerview}>
+            <Picker
+              selectedValue={selectedOpenMinute}
+              onValueChange={itemValue => changeopenminute(itemValue)}
+              mode="dropdown"
+              style={styles.Pickeritems}>
+              {TimeMinute.map((item, index) => (
+                <Picker.Item
+                  key={index}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </Picker>
+          </View>
+          <Text style={styles.pikertext}>분</Text>
+        </View>
+        <View style={styles.storeinputview}>
+          <Text style={styles.pikertext}>종료</Text>
+          <View style={styles.Pickerview}>
+            <Picker
+              selectedValue={selectedClosedHour}
+              onValueChange={itemValue => changeclosehour(itemValue)}
+              mode="dropdown"
+              style={styles.Pickeritems}>
+              {TimeHour.map((item, index) => (
+                <Picker.Item
+                  key={index}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </Picker>
+          </View>
+          <Text style={styles.pikertext}>시</Text>
+          <View style={styles.Pickerview}>
+            <Picker
+              selectedValue={selectedClosedMinute}
+              onValueChange={itemValue => changecloseminute(itemValue)}
+              mode="dropdown"
+              style={styles.Pickeritems}>
+              {TimeMinute.map((item, index) => (
+                <Picker.Item
+                  key={index}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </Picker>
+          </View>
+          <Text style={styles.pikertext}>분</Text>
         </View>
         <View style={styles.storeinputview}>
           <Text style={styles.storeinputtext}>전화 번호</Text>
@@ -225,36 +314,22 @@ const StoreaddPage = ({navigation, route}) => {
           ))}
         </View>
         <View style={styles.storeinputview}>
-          <Text style={styles.storetext}>입장 인원 추천</Text>
+          <Text style={styles.storetext}>단체석 여부 8인 이상</Text>
         </View>
         <View style={styles.storeinputview}>
           <View style={styles.CheckBoxview}>
             <CheckBox
-              value={selectedOption === 0}
+              value={selectedOption === true}
               onValueChange={() => handleCheckBoxChange(0)}
             />
-            <Text style={styles.CheckBoxtext}>1인</Text>
+            <Text style={styles.CheckBoxtext}>O</Text>
           </View>
           <View style={styles.CheckBoxview}>
             <CheckBox
-              value={selectedOption === 1}
+              value={selectedOption === false}
               onValueChange={() => handleCheckBoxChange(1)}
             />
-            <Text style={styles.CheckBoxtext}>2~4인</Text>
-          </View>
-          <View style={styles.CheckBoxview}>
-            <CheckBox
-              value={selectedOption === 2}
-              onValueChange={() => handleCheckBoxChange(2)}
-            />
-            <Text style={styles.CheckBoxtext}>4~8인</Text>
-          </View>
-          <View style={styles.CheckBoxview}>
-            <CheckBox
-              value={selectedOption === 3}
-              onValueChange={() => handleCheckBoxChange(3)}
-            />
-            <Text style={styles.CheckBoxtext}>8인이상</Text>
+            <Text style={styles.CheckBoxtext}>X</Text>
           </View>
         </View>
         <View style={styles.storeinputview}>
@@ -263,18 +338,75 @@ const StoreaddPage = ({navigation, route}) => {
         <View style={styles.storeinputview}>
           <View style={styles.CheckBoxview}>
             <CheckBox
-              value={selectedscreenOption === 0}
+              value={selectedscreenOption === true}
               onValueChange={() => handleCheckBoxscreenChange(0)}
             />
             <Text style={styles.CheckBoxtext}>O</Text>
           </View>
           <View style={styles.CheckBoxview}>
             <CheckBox
-              value={selectedscreenOption === 1}
+              value={selectedscreenOption === false}
               onValueChange={() => handleCheckBoxscreenChange(1)}
             />
             <Text style={styles.CheckBoxtext}>X</Text>
           </View>
+        </View>
+        <View style={styles.storeinputview}>
+          <Text style={styles.storetext}>휴무일</Text>
+        </View>
+        <View style={styles.storeinputview}>
+          <View style={styles.CheckBoxview}>
+            <CheckBox
+              value={selectedclosedday === 0}
+              onValueChange={() => handleclosedday(0)}
+            />
+            <Text style={styles.CheckBoxtext}>월</Text>
+          </View>
+          <View style={styles.CheckBoxview}>
+            <CheckBox
+              value={selectedclosedday === 1}
+              onValueChange={() => handleclosedday(1)}
+            />
+            <Text style={styles.CheckBoxtext}>화</Text>
+          </View>
+          <View style={styles.CheckBoxview}>
+            <CheckBox
+              value={selectedclosedday === 2}
+              onValueChange={() => handleclosedday(2)}
+            />
+            <Text style={styles.CheckBoxtext}>수</Text>
+          </View>
+          <View style={styles.CheckBoxview}>
+            <CheckBox
+              value={selectedclosedday === 3}
+              onValueChange={() => handleclosedday(3)}
+            />
+            <Text style={styles.CheckBoxtext}>목</Text>
+          </View>
+        </View>
+        <View style={styles.storeinputview}>
+          <View style={styles.CheckBoxview}>
+            <CheckBox
+              value={selectedclosedday === 4}
+              onValueChange={() => handleclosedday(4)}
+            />
+            <Text style={styles.CheckBoxtext}>금</Text>
+          </View>
+          <View style={styles.CheckBoxview}>
+            <CheckBox
+              value={selectedclosedday === 5}
+              onValueChange={() => handleclosedday(5)}
+            />
+            <Text style={styles.CheckBoxtext}>토</Text>
+          </View>
+          <View style={styles.CheckBoxview}>
+            <CheckBox
+              value={selectedclosedday === 6}
+              onValueChange={() => handleclosedday(6)}
+            />
+            <Text style={styles.CheckBoxtext}>일</Text>
+          </View>
+          <View style={styles.CheckBoxview}></View>
         </View>
         <View style={styles.storeinputview}>
           <Text style={styles.storetext}>메뉴 사진 추가하기 (최대 5장)</Text>
@@ -290,10 +422,10 @@ const StoreaddPage = ({navigation, route}) => {
 
 const categoriesitem = [
   {label: '-', value: null},
-  {label: '이자카야', value: '이자카야'},
-  {label: '한식주점', value: '한식주점'},
-  {label: '양식주점', value: '양식주점'},
-  {label: '중화주점', value: '중화주점'},
+  {label: '이자카야', value: '123123'},
+  {label: '한식주점', value: '한식123주점'},
+  {label: '양식주점', value: '양식123주점'},
+  {label: '중화주점', value: '중화123123주점'},
   {label: '감성주점', value: '감성주점'},
   {label: '족발 보쌈', value: '족발 보쌈'},
   {label: '찜 찌개', value: '찜 찌개'},
@@ -310,6 +442,44 @@ const categoriesitem = [
   {label: '와인바', value: '와인바'},
   {label: '칵테일', value: '칵테일'},
   {label: '펍 바', value: '펍 바'},
+];
+
+const TimeHour = [
+  {label: '-', value: null},
+  {label: '00', value: '00'},
+  {label: '01', value: '01'},
+  {label: '02', value: '02'},
+  {label: '03', value: '03'},
+  {label: '04', value: '04'},
+  {label: '05', value: '05'},
+  {label: '06', value: '06'},
+  {label: '07', value: '07'},
+  {label: '08', value: '08'},
+  {label: '09', value: '09'},
+  {label: '10', value: '10'},
+  {label: '11', value: '11'},
+  {label: '12', value: '12'},
+  {label: '13', value: '13'},
+  {label: '14', value: '14'},
+  {label: '15', value: '15'},
+  {label: '16', value: '16'},
+  {label: '17', value: '17'},
+  {label: '18', value: '18'},
+  {label: '19', value: '19'},
+  {label: '20', value: '20'},
+  {label: '21', value: '21'},
+  {label: '22', value: '22'},
+  {label: '23', value: '23'},
+];
+
+const TimeMinute = [
+  {label: '-', value: null},
+  {label: '00', value: '00'},
+  {label: '10', value: '10'},
+  {label: '20', value: '20'},
+  {label: '30', value: '30'},
+  {label: '40', value: '40'},
+  {label: '50', value: '50'},
 ];
 
 const styles = StyleSheet.create({
@@ -400,6 +570,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 10,
     marginLeft: 10,
+  },
+  pikertext: {
+    fontWeight: '400',
+    fontSize: 14,
+    color: 'black',
+    paddingHorizontal: 10,
   },
 });
 

@@ -8,8 +8,12 @@ import StoreMenuPage from './StoreMenuPage';
 import StoreRiviewPage from './StoreRiviewPage';
 import StoreMapPage from './StoreMapPage';
 import {ScrollView} from 'react-native-gesture-handler';
+import {useRoute} from '@react-navigation/native';
 
 const StoreMainPage = ({navigation}) => {
+  const route = useRoute();
+  const {storeId} = route.params;
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
@@ -33,19 +37,24 @@ const StoreMainPage = ({navigation}) => {
   };
 
   useEffect(() => {
-    const getStoreData = () => {
-      fetch(`http://kymokim.iptime.org:11082/api/store/get/1`, {
+    const fetchToken = async () => {
+      const savedToken = await getToken();
+      setToken(savedToken);
+      getStoreData(savedToken); // 토큰을 가져온 후에 데이터 요청
+    };
+
+    const getStoreData = token => {
+      fetch(`http://kymokim.iptime.org:11082/api/store/get/${storeId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'x-auth-token':
-            'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJyb2xlIjoiUk9MRV9VU0VSIiwiZXhwIjoxNzE3NzYwODQwfQ.ru3LZWRowTsKo2ADqVbpWz7Gmq8iwVFbbyM0DoyH3FU',
+          'x-auth-token': token,
         },
       })
         .then(response => response.json())
         .then(data => {
           setStoreName(data.data.storeName);
-          setCategory(data.data.category);
+          setCategory(data.data.firstCategory);
           setAddress(data.data.address);
           setOpenHour(data.data.openHour);
           setCloseHour(data.data.closeHour);
@@ -59,7 +68,7 @@ const StoreMainPage = ({navigation}) => {
         })
         .catch(error => console.error('Error:', error));
     };
-    getStoreData();
+    fetchToken();
   }, []);
 
   return (

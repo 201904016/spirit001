@@ -1,43 +1,111 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  FlatList,
+  Platform,
+  PermissionsAndroid,
+  Pressable,
+} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Geolocation from '@react-native-community/geolocation';
 
 const Chicken = ({navigation}) => {
+  const [location, setLocation] = useState(null);
   const [stores, setStores] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getStoreData = () => {
-      const category = '치킨';
-
-      fetch(
-        `http://kymokim.iptime.org:11082/api/store/getByCategory/${category}?latitude=${37.4997944818033}&longitude=${127.105074204186}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.data) {
-            setStores(data.data); // 데이터 저장
-          }
-        })
-        .catch(error => console.error('Error:', error));
-    };
-
-    getStoreData();
+    requestLocationPermission();
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      // 위치가 업데이트되면 매장 정보를 가져옵니다.
+      getStoreData();
+    }
+  }, [location]);
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'This app needs access to your location.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('You can use the location');
+          fetchLocation(); // 권한 허용 후 위치 가져오기
+        } else {
+          console.log('Location permission denied');
+          setError('위치 권한이 거부되었습니다.');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    } else {
+      fetchLocation(); // iOS에서는 권한 요청 없이 바로 위치 가져오기
+    }
+  };
+
+  const fetchLocation = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setLocation({latitude, longitude});
+        setError(null);
+      },
+      error => {
+        console.error(error);
+        setError(error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  };
+
+  const getStoreData = () => {
+    if (!location) return;
+    const {latitude, longitude} = location;
+    const category = 'CHICKEN';
+
+    fetch(
+      `http://kymokim.iptime.org:11082/api/store/getByCategory/${category}?latitude=${latitude}&longitude=${longitude}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.data) {
+          setStores(data.data);
+          console.log(data.data);
+        }
+      })
+      .catch(error => console.error('Error:', error));
+  };
 
   return (
     <ScrollView>
       {stores.map(store => (
         <Pressable
           onPress={() =>
-            navigation.navigate('StoreMainPage', {storeId: store.storeId})
+            navigation.navigate('StoreStack', {
+              screen: 'StoreMainPage',
+              params: {storeId: store.storeId},
+            })
           }>
           <View style={styles.StoreTopView}>
             <ScrollView
@@ -45,7 +113,11 @@ const Chicken = ({navigation}) => {
               showsHorizontalScrollIndicator={false}>
               <View style={styles.MenutopView}>
                 <Image
-                  source={require('../../assets/kim.png')} // menuItem에 이미지 URL이 있다고 가정
+                  source={
+                    store.imgUrl
+                      ? {uri: store.imgUrl}
+                      : require('../../assets/jangan.png')
+                  }
                   style={styles.MenuImg}
                 />
                 <Text style={styles.MenuTitle}></Text>

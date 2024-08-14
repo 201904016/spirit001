@@ -9,11 +9,13 @@ import StoreRiviewPage from './StoreRiviewPage';
 import StoreMapPage from './StoreMapPage';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useRoute} from '@react-navigation/native';
+import {getToken} from '../../store/Storage';
 
 const StoreMainPage = ({navigation}) => {
   const route = useRoute();
   const {storeId} = route.params;
-
+  console.log(storeId);
+  const [token, setToken] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
@@ -21,12 +23,15 @@ const StoreMainPage = ({navigation}) => {
   };
 
   const [storeName, setStoreName] = useState('');
-  const [category, setCategory] = useState('');
+  const [firstCategory, setFirstCategory] = useState('');
+  const [secondCategory, setSecondCategory] = useState('');
+  const [thirdCategory, setThirdCategory] = useState('');
   const [address, setAddress] = useState('');
   const [openHour, setOpenHour] = useState('');
   const [closepenHour, setCloseHour] = useState('');
   const [longitude, setIongitude] = useState('');
   const [lititude, setLititude] = useState('');
+  const [storeContent, setStoreContent] = useState('');
   const [storeRate, setStoreRate] = useState('');
   const [reviewCount, setReviewCount] = useState('');
   const [storeLikeCount, setStoreLikeCount] = useState('');
@@ -44,6 +49,7 @@ const StoreMainPage = ({navigation}) => {
     };
 
     const getStoreData = token => {
+      console.log(token);
       fetch(`http://kymokim.iptime.org:11082/api/store/get/${storeId}`, {
         method: 'GET',
         headers: {
@@ -54,7 +60,9 @@ const StoreMainPage = ({navigation}) => {
         .then(response => response.json())
         .then(data => {
           setStoreName(data.data.storeName);
-          setCategory(data.data.firstCategory);
+          setFirstCategory(data.data.firstCategory);
+          setSecondCategory(data.data.secondCategory);
+          setThirdCategory(data.data.thirdCategory);
           setAddress(data.data.address);
           setOpenHour(data.data.openHour);
           setCloseHour(data.data.closeHour);
@@ -63,6 +71,7 @@ const StoreMainPage = ({navigation}) => {
           setStoreRate(data.data.storeRate);
           setReviewCount(data.data.reviewCount);
           setStoreLikeCount(data.data.storeLikeCount);
+          setStoreContent(data.data.storeContent);
 
           console.log(data);
         })
@@ -100,9 +109,9 @@ const StoreMainPage = ({navigation}) => {
           <Text style={styles.Storetitle}>{storeName}</Text>
         </View>
         <View style={styles.Storesubtitleview}>
-          <Text style={styles.Storesubtitle}>{category}</Text>
-          <Text style={styles.Storesubtitle}>양식 주점</Text>
-          <Text style={styles.Storesubtitle}>양식 주점</Text>
+          <Text style={styles.Storesubtitle}>{firstCategory}</Text>
+          <Text style={styles.Storesubtitle}>{secondCategory}</Text>
+          <Text style={styles.Storesubtitle}>{thirdCategory}</Text>
         </View>
         <View style={styles.RiviewView}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -138,15 +147,14 @@ const StoreMainPage = ({navigation}) => {
         </View>
         <View style={styles.timeview}>
           <Text style={styles.timetextnow}>영업 중</Text>
-          <Text style={styles.timetext}>영업 종료 - 02:00</Text>
+          <Text style={styles.timetext}>영업 종료 - {closepenHour}</Text>
         </View>
         <View style={styles.introduceview}>
           <Pressable onPress={toggleExpand}>
             <Text
               style={styles.locationtext}
               numberOfLines={isExpanded ? null : 2}>
-              스케줄은 다양한 음식, 디저트와 함께 주류 및 최상의 서비스 까지 한
-              자리에서 즐길 수 있는 트렌디한 복합 문화 공간입니다.
+              {storeContent}
             </Text>
           </Pressable>
         </View>

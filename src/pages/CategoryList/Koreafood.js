@@ -1,34 +1,100 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image, FlatList} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  FlatList,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Geolocation from '@react-native-community/geolocation';
 
 const Koreafood = () => {
+  const [location, setLocation] = useState(null);
   const [stores, setStores] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const getStoreData = () => {
-      const category = '한식주점';
-
-      fetch(
-        `http://kymokim.iptime.org:11082/api/store/getByCategory/${category}?latitude=${37.4925472162071}&longitude=${126.882560996201}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.data) {
-            setStores(data.data); // 데이터 저장
-          }
-        })
-        .catch(error => console.error('Error:', error));
-    };
-
-    getStoreData();
+    requestLocationPermission();
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      // 위치가 업데이트되면 매장 정보를 가져옵니다.
+      getStoreData();
+    }
+  }, [location]);
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'This app needs access to your location.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('You can use the location');
+          fetchLocation(); // 권한 허용 후 위치 가져오기
+        } else {
+          console.log('Location permission denied');
+          setError('위치 권한이 거부되었습니다.');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    } else {
+      fetchLocation(); // iOS에서는 권한 요청 없이 바로 위치 가져오기
+    }
+  };
+
+  const fetchLocation = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setLocation({latitude, longitude});
+        setError(null);
+      },
+      error => {
+        console.error(error);
+        setError(error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  };
+
+  const getStoreData = () => {
+    if (!location) return;
+
+    const category = '한식주점';
+    const {latitude, longitude} = location;
+    console.log(latitude, longitude);
+
+    fetch(
+      `http://kymokim.iptime.org:11082/api/store/getByCategory/${category}?latitude=${latitude}&longitude=${longitude}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.data) {
+          setStores(data.data); // 데이터 저장
+          console.log(stores);
+        }
+      })
+      .catch(error => console.error('Error:', error));
+  };
 
   const renderItem = ({item}) => (
     <View style={styles.recentView}>

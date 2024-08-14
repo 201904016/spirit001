@@ -13,14 +13,25 @@ import Geolocation from '@react-native-community/geolocation';
 import SearchPage from './SearchPage';
 
 const MapPage = ({navigation}) => {
+  const [location, setLocation] = useState(null);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [error, setError] = useState(null);
+
+  const [stores, setStores] = useState([]);
+  const [selectedStore, setSelectedStore] = useState(null); // 선택된 가게 상태
   const webViewRef = useRef(null);
 
   useEffect(() => {
     requestLocationPermission();
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      // 위치가 업데이트되면 매장 정보를 가져옵니다.
+      getStoreData();
+    }
+  }, [location]);
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -54,34 +65,12 @@ const MapPage = ({navigation}) => {
     Geolocation.getCurrentPosition(
       position => {
         const {latitude, longitude} = position.coords;
+
+        setLocation({latitude, longitude});
         setLatitude(latitude);
         setLongitude(longitude);
         setError(null);
-        updateMap(latitude, longitude); // 위치 정보 업데이트 후 지도 갱신
-
-        // var data = {
-        //   longitude: longitude,
-        //   latitude: latitude,
-        // };
-        // console.log(data);
-        // fetch('http://kymokim.iptime.org:11082/api/location', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   mode: 'cors',
-        //   credentials: 'include',
-        //   body: JSON.stringify(data),
-        // })
-        //   .then(response => {
-        //     return response.json();
-        //   })
-        //   .then(data => {
-        //     console.log(data);
-        //   })
-        //   .catch(error => {
-        //     console.error(error);
-        //   });
+        updateMap(latitude, longitude, stores); // 위치 정보 업데이트 후 지도 갱신
       },
       error => {
         console.error(error);
@@ -105,8 +94,33 @@ const MapPage = ({navigation}) => {
     fetchLocation();
   };
 
-  const updateMap = (lat, lng) => {
+  const getStoreData = () => {
+    if (!location) return;
+
+    const {latitude, longitude} = location;
+
+    fetch(
+      `http://kymokim.iptime.org:11082/api/store/getByDistance?latitude=${latitude}&longitude=${longitude}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.data) {
+          setStores(data.data); // 데이터 저장
+          updateMap(latitude, longitude, data.data); // 위치와 가게 데이터를 전달하여 지도 업데이트
+        }
+      })
+      .catch(error => console.error('Error:', error));
+  };
+
+  const updateMap = (lat, lng, stores) => {
     if (webViewRef.current) {
+      // 현재 위치 마커와 가게 정보 마커를 모두 표시하는 JavaScript 코드
       const injectJavaScript = `
         var mapContainer = document.getElementById('map');
         var options = {
@@ -114,13 +128,36 @@ const MapPage = ({navigation}) => {
           level: 3
         };
         var map = new kakao.maps.Map(mapContainer, options);
-
-        var markerPosition = new kakao.maps.LatLng(${lat}, ${lng});
-        var marker = new kakao.maps.Marker({
-          position: markerPosition
+  
+        // 현재 위치 마커 추가
+        var currentMarkerPosition = new kakao.maps.LatLng(${lat}, ${lng});
+        var currentMarker = new kakao.maps.Marker({
+          position: currentMarkerPosition,
+          map: map,
+          title: '현재 위치',
+          zIndex: 1
         });
+        
+        // 가져온 가게 정보 마커 추가
+        var storeMarkers = ${JSON.stringify(stores)}.map(store => {
+          var markerPosition = new kakao.maps.LatLng(store.latitude, store.longitude);
+          var marker = new kakao.maps.Marker({
+            position: markerPosition,
+            map: map,
+            title: store.name,
+            zIndex: 2,
+            image: new kakao.maps.MarkerImage(
+              'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', 
+              new kakao.maps.Size(24, 35)
+            )
+          });
 
-        marker.setMap(map);
+          kakao.maps.event.addListener(marker, 'click', function() {
+            window.ReactNativeWebView.postMessage(JSON.stringify(store));
+          });
+
+          return marker;
+        });
       `;
       webViewRef.current.injectJavaScript(injectJavaScript);
     }
@@ -157,6 +194,10 @@ const MapPage = ({navigation}) => {
         javaScriptEnabled={true}
         domStorageEnabled={true}
         startInLoadingState={true}
+        onMessage={event => {
+          const store = JSON.parse(event.nativeEvent.data);
+          setSelectedStore(store);
+        }}
       />
       <Pressable
         style={styles.buttonTop}
@@ -166,6 +207,14 @@ const MapPage = ({navigation}) => {
       <Pressable style={styles.buttonBottom} onPress={updateLocation}>
         <Text style={styles.buttonText}>내 위치</Text>
       </Pressable>
+
+      {selectedStore && (
+        <View style={styles.storeInfo}>
+          <Text style={styles.storeName}>{selectedStore.storeName}</Text>
+          <Text style={styles.storeAddress}>{selectedStore.address}</Text>
+          {/* 추가적인 정보도 표시 가능 */}
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -218,6 +267,30 @@ const styles = StyleSheet.create({
     width: '100%',
     left: '3%',
     textAlign: 'left',
+  },
+  storeInfo: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -2},
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 10,
+  },
+  storeName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  storeAddress: {
+    fontSize: 16,
+    color: '#666',
   },
 });
 

@@ -339,8 +339,8 @@ const MainPage = ({navigation}) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollViewContent}>
           {items.map((item, index) => (
-            <View>
-              <View key={index} style={styles.backimageview}>
+            <View key={index}>
+              <View style={styles.backimageview}>
                 <ImageBackground
                   source={require('../assets/MainPagetodayimg.png')}
                   style={styles.backimage}

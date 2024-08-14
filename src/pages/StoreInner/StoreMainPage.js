@@ -10,6 +10,7 @@ import StoreMapPage from './StoreMapPage';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useRoute} from '@react-navigation/native';
 import {getToken} from '../../store/Storage';
+import Categorytrans from '../../hooks/Categorytrans';
 
 const StoreMainPage = ({navigation}) => {
   const route = useRoute();
@@ -23,9 +24,7 @@ const StoreMainPage = ({navigation}) => {
   };
 
   const [storeName, setStoreName] = useState('');
-  const [firstCategory, setFirstCategory] = useState('');
-  const [secondCategory, setSecondCategory] = useState('');
-  const [thirdCategory, setThirdCategory] = useState('');
+  const [categorys, setCategorys] = useState([]);
   const [address, setAddress] = useState('');
   const [openHour, setOpenHour] = useState('');
   const [closepenHour, setCloseHour] = useState('');
@@ -61,9 +60,7 @@ const StoreMainPage = ({navigation}) => {
         .then(data => {
           const categories = data.data.categories;
           setStoreName(data.data.storeName);
-          setFirstCategory(categories[0]);
-          setSecondCategory(categories[1]);
-          setThirdCategory(categories[2]);
+          setCategorys(categories);
           setAddress(data.data.address);
           setOpenHour(data.data.openHour);
           setCloseHour(data.data.closeHour);
@@ -80,6 +77,8 @@ const StoreMainPage = ({navigation}) => {
     };
     fetchToken();
   }, []);
+
+  const translatedCategories = Categorytrans({categories: categorys});
 
   return (
     <ScrollView>
@@ -110,9 +109,9 @@ const StoreMainPage = ({navigation}) => {
           <Text style={styles.Storetitle}>{storeName}</Text>
         </View>
         <View style={styles.Storesubtitleview}>
-          <Text style={styles.Storesubtitle}>{firstCategory}</Text>
-          <Text style={styles.Storesubtitle}>{secondCategory}</Text>
-          <Text style={styles.Storesubtitle}>{thirdCategory}</Text>
+          <Text style={styles.Storesubtitle}>{translatedCategories[0]}</Text>
+          <Text style={styles.Storesubtitle}>{translatedCategories[1]}</Text>
+          <Text style={styles.Storesubtitle}>{translatedCategories[2]}</Text>
         </View>
         <View style={styles.RiviewView}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>

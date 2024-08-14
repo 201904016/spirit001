@@ -70,7 +70,20 @@ const Mainbtmbar = () => {
       <Tab.Screen
         name="LikePage"
         component={LikePage}
-        options={{tabBarLabel: '저장', headerShown: false}}
+        options={({navigation}) => ({
+          tabBarLabel: '저장',
+          title: '찜',
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.navigate(MainPage)}>
+              <Ionicons
+                name="arrow-back-outline"
+                size={25}
+                color="black"
+                style={{marginLeft: 13, paddingRight: 15}}
+              />
+            </Pressable>
+          ),
+        })}
       />
 
       {isLoggedIn ? (

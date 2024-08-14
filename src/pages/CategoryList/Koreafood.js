@@ -7,11 +7,14 @@ import {
   FlatList,
   Platform,
   PermissionsAndroid,
+  Pressable,
 } from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Geolocation from '@react-native-community/geolocation';
 
-const Koreafood = () => {
+const Koreafood = ({navigation}) => {
   const [location, setLocation] = useState(null);
   const [stores, setStores] = useState([]);
   const [error, setError] = useState(null);
@@ -72,10 +75,8 @@ const Koreafood = () => {
 
   const getStoreData = () => {
     if (!location) return;
-
-    const category = '한식주점';
     const {latitude, longitude} = location;
-    console.log(latitude, longitude);
+    const category = 'KOREAN';
 
     fetch(
       `http://kymokim.iptime.org:11082/api/store/getByCategory/${category}?latitude=${latitude}&longitude=${longitude}`,
@@ -89,86 +90,118 @@ const Koreafood = () => {
       .then(response => response.json())
       .then(data => {
         if (data && data.data) {
-          setStores(data.data); // 데이터 저장
-          console.log(stores);
+          setStores(data.data);
+          console.log(data.data);
         }
       })
       .catch(error => console.error('Error:', error));
   };
 
-  const renderItem = ({item}) => (
-    <View style={styles.recentView}>
-      <Image
-        source={
-          item.imgUrl ? {uri: item.imgUrl} : require('../../assets/jangan.png')
-        }
-        style={styles.recentimg}
-      />
-      <View style={styles.recentMainTextview}>
-        <Text style={styles.recentMainText}>{item.storeName}</Text>
-        <View style={{flexDirection: 'row'}}>
-          <Ionicons name={'star'} size={20} color={'yellow'} />
-          <Text style={styles.recentMainText}>{item.storeRate}</Text>
-        </View>
-      </View>
-      <Text style={styles.recentsubText}>
-        {item.firstCategory}, {item.secondCategory}, {item.thirdCategory}
-      </Text>
-      <View style={styles.recenttimeview}>
-        <Text style={styles.recenttimetext}>
-          {item.closeHour ? `영업종료 ${item.closeHour}` : '영업종료 시간 없음'}
-        </Text>
-        <Text style={{fontSize: 12}}>287m</Text>
-      </View>
-    </View>
-  );
-
   return (
-    <FlatList
-      data={stores}
-      renderItem={renderItem}
-      keyExtractor={item => item.storeId.toString()}
-    />
+    <ScrollView style={{backgroundColor: 'white'}}>
+      {stores.map(store => (
+        <Pressable
+          onPress={() =>
+            navigation.navigate('StoreStack', {
+              screen: 'StoreMainPage',
+              params: {storeId: store.storeId},
+            })
+          }>
+          <View style={styles.StoreTopView}>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}>
+              <View style={styles.MenutopView}>
+                <Image
+                  source={
+                    store.imgUrl
+                      ? {uri: store.imgUrl}
+                      : require('../../assets/kim.png')
+                  }
+                  style={styles.MenuImg}
+                />
+                <Text style={styles.MenuTitle}></Text>
+                <Text style={styles.MenuPrice}></Text>
+              </View>
+            </ScrollView>
+            <View style={styles.StoreView}>
+              <Text style={styles.StoreTitle}>{store.storeName}</Text>
+              <View style={styles.Storescore}>
+                <FontAwesomeIcon name="star" size={20} color="#FCC104" />
+                <Text style={styles.scoretext}>{store.storeRate}</Text>
+                <Text style={styles.scoretext}>
+                  고객리뷰 {store.reviewCount}
+                </Text>
+                <Text style={styles.scoretext}>찜 {store.storeLikeCount}</Text>
+              </View>
+              <View style={styles.Storetime}>
+                <Ionicons name="time-outline" size={20} color="gray" />
+                <Text style={styles.scoretext}>
+                  영업중 {store.closeHour} 라스트 오더
+                </Text>
+              </View>
+            </View>
+            <View style={styles.line}></View>
+          </View>
+        </Pressable>
+      ))}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  recentView: {
-    marginLeft: 20,
-    margin: 10,
+  StoreTopView: {
+    marginVertical: 15,
   },
-  recentimg: {
-    width: 150,
-    height: 100,
-    resizeMode: 'contain',
-    borderRadius: 10,
+  MenutopView: {
+    marginHorizontal: 15,
+    alignItems: 'center',
   },
-  recentMainTextview: {
-    width: 150,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  MenuImg: {
+    width: 140,
+    resizeMode: 'cover',
+    height: 140,
+    borderRadius: 20,
   },
-  recentMainText: {
-    color: 'black',
+  MenuTitle: {
+    marginTop: 8,
     fontWeight: 'bold',
     fontSize: 16,
-    marginTop: 2,
   },
-  recentsubText: {
-    color: 'gray',
-    fontWeight: '400',
+  MenuPrice: {
+    marginTop: 3,
+    fontWeight: '700',
     fontSize: 14,
-    marginTop: 1,
   },
-  recenttimeview: {
-    marginTop: 4,
-    width: 150,
+  StoreView: {
+    marginHorizontal: 15,
+    marginTop: 12,
+    alignItems: 'flex-start',
+  },
+  StoreTitle: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    color: 'black',
+  },
+  Storescore: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 4,
   },
-  recenttimetext: {
-    fontSize: 12,
-    color: 'red',
+  Storetime: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  scoretext: {
+    marginLeft: 4,
+  },
+  line: {
+    marginTop: 15,
+    width: '100%',
+    height: 2,
+    borderColor: 'lightgray',
+    borderWidth: 1,
   },
 });
 

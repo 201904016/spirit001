@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import MainStack from '../components/MainStack';
 import StoreaddPage from './StoreaddPage';
@@ -327,8 +328,9 @@ const MainPage = ({navigation}) => {
         />
       </View>
       <View style={styles.todayPhrasesView}>
-        <Text style={styles.mylocationlivetext}>
-          2~4인 가볍게 2차로 추전 드려요
+        <Text style={styles.mylocationlivetext}>제일 가까운 주점은?</Text>
+        <Text style={styles.mylocationlivesubtext}>
+          현재 위치에서 가장 가까운 주점을 알려드려요
         </Text>
       </View>
       <View>
@@ -337,44 +339,34 @@ const MainPage = ({navigation}) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollViewContent}>
           {items.map((item, index) => (
-            <View key={index} style={styles.backimageview}>
-              <ImageBackground
-                source={require('../assets/MainPagetodayimg.png')}
-                style={styles.backimage}
-                imageStyle={styles.backimagestyle}>
-                <View style={styles.MainTextView}>
-                  <Text style={styles.MainText}>{item.name}</Text>
-                  <Text style={styles.MainsubText}>{item.description}</Text>
-                  <View style={styles.innerTextview}>
-                    <Text style={styles.innertext}>{item.closeTime}</Text>
+            <View>
+              <View key={index} style={styles.backimageview}>
+                <ImageBackground
+                  source={require('../assets/MainPagetodayimg.png')}
+                  style={styles.backimage}
+                  imageStyle={styles.backimagestyle}>
+                  <View style={styles.MainTextView}>
+                    <View style={styles.innerTexttopview}>
+                      <Text style={styles.innertoptext}>{item.closeTime}</Text>
+                    </View>
+                    <Text style={styles.MainText}>{item.name}</Text>
+                    <Text style={styles.MainsubText}>{item.description}</Text>
                     <Text style={styles.innertext}>{item.distance}</Text>
                   </View>
+                </ImageBackground>
+              </View>
+              <View style={styles.distanceview}>
+                <Text style={styles.distancetext}>127m</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <MaterialCommunityIcons
+                    name={'run'}
+                    size={15}
+                    color={'#474747'}
+                    style={styles.distanceicon}
+                  />
+                  <Text style={styles.distancetext}>1분</Text>
                 </View>
-              </ImageBackground>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-      <View>
-        <ScrollView
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollViewContent}>
-          {items.map((item, index) => (
-            <View key={index} style={styles.backimageview}>
-              <ImageBackground
-                source={require('../assets/MainPagetodayimg.png')}
-                style={styles.backimage}
-                imageStyle={styles.backimagestyle}>
-                <View style={styles.MainTextView}>
-                  <Text style={styles.MainText}>{item.name}</Text>
-                  <Text style={styles.MainsubText}>{item.description}</Text>
-                  <View style={styles.innerTextview}>
-                    <Text style={styles.innertext}>{item.closeTime}</Text>
-                    <Text style={styles.innertext}>{item.distance}</Text>
-                  </View>
-                </View>
-              </ImageBackground>
+              </View>
             </View>
           ))}
         </ScrollView>
@@ -635,25 +627,25 @@ const items = [
     name: '모퉁이집',
     description: '한식주점 단체',
     closeTime: '영업종료 02:00',
-    distance: '287m',
+    distance: '#매운갈비찜',
   },
   {
     name: '친구포차',
     description: '한식주점 포차',
     closeTime: '영업종료 00:00',
-    distance: '127m',
+    distance: '#매운갈비찜 #우삼겹볶음',
   },
   {
     name: '봉이동동',
     description: '한식주점 탕',
     closeTime: '영업종료 01:00',
-    distance: '312m',
+    distance: '#매운갈비찜',
   },
   {
     name: '역전할머니 맥주',
     description: '치킨 호프',
     closeTime: '영업종료 04:00',
-    distance: '267m',
+    distance: '#매운갈비찜',
   },
 ];
 
@@ -828,7 +820,8 @@ const styles = StyleSheet.create({
   backimageview: {
     width: 150,
     height: 150,
-    margin: 10,
+    marginTop: 10,
+    marginRight: 10,
     marginLeft: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -858,18 +851,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'white',
     fontWeight: 'bold',
+    marginBottom: 30,
   },
-  innerTextview: {
+  innerTexttopview: {
     width: 150,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
+    alignItems: 'flex-end',
+    marginRight: 20,
+  },
+  innertoptext: {
+    fontSize: 10,
+    color: 'white',
+    fontWeight: 'bold',
   },
   innertext: {
     fontSize: 10,
     color: 'white',
     fontWeight: 'bold',
-    paddingHorizontal: 15,
   },
   recentView: {
     marginLeft: 20,
@@ -970,6 +967,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingTop: 10,
     paddingBottom: 6,
+  },
+
+  distanceview: {
+    flexDirection: 'row',
+    width: 150,
+    marginLeft: 20,
+    marginTop: 2,
+    paddingHorizontal: 5,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  distancetext: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: 'black',
+  },
+  distanceicon: {
+    borderRadius: 30,
+    padding: 2,
+    color: '#10BEFB',
+  },
+  mylocationlivesubtext: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: 'gray',
+    marginTop: 3,
   },
 });
 

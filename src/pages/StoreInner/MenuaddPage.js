@@ -22,7 +22,7 @@ const MenuaddPage = () => {
 
   const [isSelgitected, setIsSelected] = useState(false);
   const handleCheckBoxChange = () => {
-    setIsSelected(!isSelected); // 선택 상태를 반전시킵니다.
+    setIsSelected(!isSelgitected); // 선택 상태를 반전시킵니다.
   };
 
   const MenuAdd = () => {
@@ -92,7 +92,7 @@ const MenuaddPage = () => {
           </View>
           <View style={styles.checkBoxView}>
             <CheckBox
-              value={isSelected} // 선택 상태를 prop으로 전달합니다.
+              value={isSelgitected} // 선택 상태를 prop으로 전달합니다.
               onValueChange={handleCheckBoxChange} // 체크박스 변경 시 호출되는 함수를 지정합니다.
             />
             <Text style={styles.checkBoxText}>대표 메뉴 설정</Text>

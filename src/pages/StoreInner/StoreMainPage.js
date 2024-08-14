@@ -59,10 +59,11 @@ const StoreMainPage = ({navigation}) => {
       })
         .then(response => response.json())
         .then(data => {
+          const categories = data.data.categories;
           setStoreName(data.data.storeName);
-          setFirstCategory(data.data.firstCategory);
-          setSecondCategory(data.data.secondCategory);
-          setThirdCategory(data.data.thirdCategory);
+          setFirstCategory(categories[0]);
+          setSecondCategory(categories[1]);
+          setThirdCategory(categories[2]);
           setAddress(data.data.address);
           setOpenHour(data.data.openHour);
           setCloseHour(data.data.closeHour);

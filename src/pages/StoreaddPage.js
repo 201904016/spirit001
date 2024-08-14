@@ -10,6 +10,7 @@ import {
   Image,
   TextInput,
   Dimensions,
+  Alert,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import CheckBox from '@react-native-community/checkbox';
@@ -150,7 +151,40 @@ const StoreaddPage = ({navigation, route}) => {
       body: JSON.stringify(data),
     })
       .then(response => {
-        return response.json();
+        if (response.status != 200) {
+          Alert.alert(
+            '안됨',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+              },
+            ],
+            {cancelable: false},
+          );
+          return;
+        } else {
+          return response.json();
+        }
+      })
+      .then(response => {
+        if (response) {
+          Alert.alert(
+            '등록이 완료되었습니다.',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+                onPress: () => {
+                  navigation.navigate('MainPage');
+                },
+              },
+            ],
+            {cancelable: false},
+          );
+        }
       })
       .then(data => {
         console.log(data);
@@ -211,6 +245,7 @@ const StoreaddPage = ({navigation, route}) => {
                   key={index}
                   label={item.label}
                   value={item.value}
+                  style={styles.Pickeritems}
                 />
               ))}
             </Picker>
@@ -227,6 +262,7 @@ const StoreaddPage = ({navigation, route}) => {
                   key={index}
                   label={item.label}
                   value={item.value}
+                  style={styles.Pickeritems}
                 />
               ))}
             </Picker>
@@ -246,6 +282,7 @@ const StoreaddPage = ({navigation, route}) => {
                   key={index}
                   label={item.label}
                   value={item.value}
+                  style={styles.Pickeritems}
                 />
               ))}
             </Picker>
@@ -262,6 +299,7 @@ const StoreaddPage = ({navigation, route}) => {
                   key={index}
                   label={item.label}
                   value={item.value}
+                  style={styles.Pickeritems}
                 />
               ))}
             </Picker>

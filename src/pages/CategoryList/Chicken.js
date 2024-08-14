@@ -98,7 +98,7 @@ const Chicken = ({navigation}) => {
   };
 
   return (
-    <ScrollView>
+    <ScrollView style={{backgroundColor: 'white'}}>
       {stores.map(store => (
         <Pressable
           onPress={() =>
@@ -116,7 +116,7 @@ const Chicken = ({navigation}) => {
                   source={
                     store.imgUrl
                       ? {uri: store.imgUrl}
-                      : require('../../assets/jangan.png')
+                      : require('../../assets/kim.png')
                   }
                   style={styles.MenuImg}
                 />
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   MenuImg: {
     width: 140,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
     height: 140,
     borderRadius: 20,
   },

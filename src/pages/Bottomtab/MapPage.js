@@ -7,10 +7,13 @@ import {
   Pressable,
   Text,
   View,
+  Image,
 } from 'react-native';
 import {WebView} from 'react-native-webview';
 import Geolocation from '@react-native-community/geolocation';
 import SearchPage from './SearchPage';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import Feather from 'react-native-vector-icons/Feather';
 
 const MapPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
@@ -120,7 +123,6 @@ const MapPage = ({navigation}) => {
 
   const updateMap = (lat, lng, stores) => {
     if (webViewRef.current) {
-      // 현재 위치 마커와 가게 정보 마커를 모두 표시하는 JavaScript 코드
       const injectJavaScript = `
         var mapContainer = document.getElementById('map');
         var options = {
@@ -138,7 +140,7 @@ const MapPage = ({navigation}) => {
           zIndex: 1
         });
         
-        // 가져온 가게 정보 마커 추가
+        // 가게 정보 마커 추가
         var storeMarkers = ${JSON.stringify(stores)}.map(store => {
           var markerPosition = new kakao.maps.LatLng(store.latitude, store.longitude);
           var marker = new kakao.maps.Marker({
@@ -158,6 +160,11 @@ const MapPage = ({navigation}) => {
 
           return marker;
         });
+
+        // 지도 클릭 이벤트 감지 및 전달
+        kakao.maps.event.addListener(map, 'click', function() {
+          window.ReactNativeWebView.postMessage('mapClicked');
+        });
       `;
       webViewRef.current.injectJavaScript(injectJavaScript);
     }
@@ -175,6 +182,7 @@ const MapPage = ({navigation}) => {
         #map {
           width: 100%;
           height: 100vh;
+          border: none; /* 테두리 없애기 */
         }
       </style>
     </head>
@@ -185,7 +193,7 @@ const MapPage = ({navigation}) => {
   `;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
@@ -195,8 +203,13 @@ const MapPage = ({navigation}) => {
         domStorageEnabled={true}
         startInLoadingState={true}
         onMessage={event => {
-          const store = JSON.parse(event.nativeEvent.data);
-          setSelectedStore(store);
+          const message = event.nativeEvent.data;
+          if (message === 'mapClicked') {
+            setSelectedStore(null); // 지도 클릭 시 가게 정보 숨기기
+          } else {
+            const store = JSON.parse(message);
+            setSelectedStore(store);
+          }
         }}
       />
       <Pressable
@@ -205,17 +218,47 @@ const MapPage = ({navigation}) => {
         <Text style={styles.buttonTextTop}>장소, 지역 검색</Text>
       </Pressable>
       <Pressable style={styles.buttonBottom} onPress={updateLocation}>
-        <Text style={styles.buttonText}>내 위치</Text>
+        <Feather name="crosshair" size={30} color="gray" />
       </Pressable>
 
       {selectedStore && (
-        <View style={styles.storeInfo}>
-          <Text style={styles.storeName}>{selectedStore.storeName}</Text>
-          <Text style={styles.storeAddress}>{selectedStore.address}</Text>
-          {/* 추가적인 정보도 표시 가능 */}
-        </View>
+        <Pressable>
+          <View style={styles.storeInfo}>
+            <Image
+              source={require('../../assets/kim.png')}
+              style={styles.storeImage}
+            />
+            <View style={styles.titletopview}>
+              <View style={styles.titleview}>
+                <Text style={styles.storeName}>{selectedStore.storeName}</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <FontAwesomeIcon name="star" size={15} color="#FCC104" />
+                  <Text style={styles.storeAddress}>
+                    {selectedStore.storeRate}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.category}>
+                <Text style={styles.storeAddress}>
+                  {selectedStore.firstCategory}
+                </Text>
+                <Text style={styles.storeAddress}>
+                  {selectedStore.secondCategory}
+                </Text>
+                <Text style={styles.storeAddress}>
+                  {selectedStore.thirdCategory}
+                </Text>
+              </View>
+              <View style={styles.timeview}>
+                <Text style={styles.timeviewtext}>영업종료 02:00</Text>
+              </View>
+              <Text style={styles.menutext}>대표메뉴 : 스케쥴 기미</Text>
+            </View>
+          </View>
+        </Pressable>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -245,15 +288,13 @@ const styles = StyleSheet.create({
   },
   buttonBottom: {
     position: 'absolute',
-    bottom: '30%',
-    left: '5%',
-    backgroundColor: '#16BBFF',
-    padding: 10,
+    bottom: '25%',
+    left: '10%',
+    backgroundColor: 'white',
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 100,
-    width: 70,
-    height: 50,
+    padding: 10,
   },
   buttonText: {
     color: 'white',
@@ -269,28 +310,67 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   storeInfo: {
+    flexDirection: 'row',
+    width: '80%',
+    left: '10%',
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 60,
     backgroundColor: '#fff',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    padding: 15,
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: -2},
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 10,
   },
+  titletopview: {
+    flex: 1,
+    marginLeft: 20,
+  },
+  titleview: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 3,
+  },
+  category: {
+    flexDirection: 'row',
+    marginBottom: 3,
+  },
   storeName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: 'black',
   },
   storeAddress: {
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: '700',
     color: '#666',
+    marginRight: 5,
+  },
+  todayimageView: {
+    alignItems: 'center',
+  },
+  storeImage: {
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
+    borderRadius: 10,
+  },
+  timeview: {
+    flexDirection: 'row',
+  },
+  timeviewtext: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: 'gray',
+    marginBottom: 15,
+  },
+  menutext: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: 'gray',
   },
 });
 

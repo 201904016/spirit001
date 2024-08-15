@@ -1,13 +1,44 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, Pressable, Image} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
+import {useRoute} from '@react-navigation/native';
+import {getToken} from '../../store/Storage';
 
 const StoreMenuPage = ({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const route = useRoute();
+  const {storeId} = route.params;
+  const [token, setToken] = useState(null);
+  const [menus, setMenus] = useState([]);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const savedToken = await getToken();
+      setToken(savedToken);
+      getStoreData(savedToken);
+    };
+
+    const getStoreData = savedToken => {
+      fetch(`http://kymokim.iptime.org:11082/api/store/get/${storeId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': savedToken,
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          const categories = data.data.categories;
+          setMenus(data.data.menuList);
+        })
+        .catch(error => console.error('Error:', error));
+    };
+    fetchToken();
+  }, []);
 
   return (
     <View style={styles.zz}>
@@ -15,7 +46,9 @@ const StoreMenuPage = ({navigation}) => {
         <View style={styles.MenuaddView}>
           <Pressable
             style={styles.MenuaddButton}
-            onPress={() => navigation.navigate('MenuaddPage')}>
+            onPress={() =>
+              navigation.navigate('MenuaddPage', {storeId: storeId})
+            }>
             <Text style={styles.MenuaddButtonText}>메뉴 추가하기</Text>
           </Pressable>
         </View>
@@ -84,70 +117,38 @@ const StoreMenuPage = ({navigation}) => {
         <View style={styles.SignatureTextView}>
           <Text style={styles.MenuText}>메뉴</Text>
         </View>
-        <View style={styles.SignatureMenuView}>
-          <View style={styles.Signatureimgview}>
-            <Image
-              source={require('../../assets/kim.png')}
-              style={styles.Signatureimg}
-            />
+        {menus.map(menu => (
+          <View style={styles.SignatureMenuView}>
+            <View style={styles.Signatureimgview}>
+              <Image
+                source={
+                  menu.imgUrl
+                    ? {uri: menu.imgUrl}
+                    : require('../../assets/kim.png')
+                }
+                style={styles.Signatureimg}
+              />
+            </View>
+            <View style={styles.SignatureMenuTextsview}>
+              <Text style={styles.Signaturetitle}>{menu.menuName}</Text>
+              <Pressable onPress={toggleExpand}>
+                <Text
+                  style={styles.Signaturecontent}
+                  numberOfLines={isExpanded ? null : 2}>
+                  {menu.menuContent}
+                </Text>
+              </Pressable>
+              <Text style={styles.Signatureprice}>{menu.price} 원</Text>
+            </View>
           </View>
-          <View style={styles.SignatureMenuTextsview}>
-            <Text style={styles.Signaturetitle}>스케줄 김치 볶음밥</Text>
-            <Pressable onPress={toggleExpand}>
-              <Text
-                style={styles.Signaturecontent}
-                numberOfLines={isExpanded ? null : 2}>
-                튀긴 호박 고구마가 들어간 청담동에서 가장맛있는 김치볶음밥
-              </Text>
-            </Pressable>
-            <Text style={styles.Signatureprice}>10,000 원</Text>
-          </View>
-        </View>
-        <View style={styles.SignatureMenuView}>
-          <View style={styles.Signatureimgview}>
-            <Image
-              source={require('../../assets/kim.png')}
-              style={styles.Signatureimg}
-            />
-          </View>
-          <View style={styles.SignatureMenuTextsview}>
-            <Text style={styles.Signaturetitle}>스케줄 김치 볶음밥</Text>
-            <Pressable onPress={toggleExpand}>
-              <Text
-                style={styles.Signaturecontent}
-                numberOfLines={isExpanded ? null : 2}>
-                튀긴 호박 고구마가 들어간 청담동에서 가장맛있는 김치볶음밥
-              </Text>
-            </Pressable>
-            <Text style={styles.Signatureprice}>10,000 원</Text>
-          </View>
-        </View>
-        <View style={styles.SignatureMenuView}>
-          <View style={styles.Signatureimgview}>
-            <Image
-              source={require('../../assets/kim.png')}
-              style={styles.Signatureimg}
-            />
-          </View>
-          <View style={styles.SignatureMenuTextsview}>
-            <Text style={styles.Signaturetitle}>스케줄 김치 볶음밥</Text>
-            <Pressable onPress={toggleExpand}>
-              <Text
-                style={styles.Signaturecontent}
-                numberOfLines={isExpanded ? null : 2}>
-                튀긴 호박 고구마가 들어간 청담동에서 가장맛있는 김치볶음밥
-              </Text>
-            </Pressable>
-            <Text style={styles.Signatureprice}>10,000 원</Text>
-          </View>
-        </View>
+        ))}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  zz: {marginBottom: 400},
+  zz: {marginBottom: 20},
   SignatureTopView: {
     alignItems: 'center',
     borderWidth: 1,

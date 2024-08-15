@@ -50,7 +50,7 @@ const StoreRiviewPage = ({navigation}) => {
                     style={styles.MenuaddButton}
                     onPress={() => navigation.navigate('CommonRiviewPage')}>
                     <Ionicons
-                      name={'chatbox - ellipses - outline'}
+                      name={'chatbox-ellipses-outline'}
                       size={25}
                       color={'black'}
                     />

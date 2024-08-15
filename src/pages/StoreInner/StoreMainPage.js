@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, Pressable, ImageBackground, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  ImageBackground,
+  StyleSheet,
+  Modal,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -15,9 +22,17 @@ import Categorytrans from '../../hooks/Categorytrans';
 const StoreMainPage = ({navigation}) => {
   const route = useRoute();
   const {storeId} = route.params;
-  console.log(storeId);
   const [token, setToken] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const onPressModalOpen = () => {
+    setIsModalVisible(true);
+  };
+
+  const onPressModalClose = () => {
+    setIsModalVisible(false);
+  };
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -34,7 +49,7 @@ const StoreMainPage = ({navigation}) => {
   const [storeRate, setStoreRate] = useState('');
   const [reviewCount, setReviewCount] = useState('');
   const [storeLikeCount, setStoreLikeCount] = useState('');
-  const [currentPage, setCurrentPage] = useState('RestLivePage');
+  const [currentPage, setCurrentPage] = useState('StoreMenuPage');
 
   const changePage = page => {
     setCurrentPage(page);
@@ -70,8 +85,7 @@ const StoreMainPage = ({navigation}) => {
           setReviewCount(data.data.reviewCount);
           setStoreLikeCount(data.data.storeLikeCount);
           setStoreContent(data.data.storeContent);
-
-          console.log(data);
+          console.log(data.data.menuList);
         })
         .catch(error => console.error('Error:', error));
     };
@@ -104,9 +118,15 @@ const StoreMainPage = ({navigation}) => {
             </Pressable>
           </View>
         </ImageBackground>
-
         <View style={styles.Storetitleview}>
           <Text style={styles.Storetitle}>{storeName}</Text>
+          <Pressable onPress={onPressModalOpen} style={styles.updateicons}>
+            <MaterialCommunityIcons
+              name={'dots-vertical'}
+              size={30}
+              color={'black'}
+            />
+          </Pressable>
         </View>
         <View style={styles.Storesubtitleview}>
           <Text style={styles.Storesubtitle}>{translatedCategories[0]}</Text>
@@ -189,7 +209,7 @@ const StoreMainPage = ({navigation}) => {
 
       <View>
         {currentPage === 'StoreMenuPage' && (
-          <StoreMenuPage navigation={navigation} />
+          <StoreMenuPage navigation={navigation} storeId={storeId} />
         )}
         {currentPage === 'StoreRiviewPage' && (
           <StoreRiviewPage navigation={navigation} />
@@ -198,6 +218,28 @@ const StoreMainPage = ({navigation}) => {
           <StoreMapPage navigation={navigation} />
         )}
       </View>
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modaltopview}>
+              <View>
+                <Pressable style={styles.modalupdeteview}>
+                  <Text style={styles.modalupdetetext}>매장 수정</Text>
+                </Pressable>
+                <View style={styles.line}></View>
+                <Pressable style={styles.modalupdeteview}>
+                  <Text style={styles.modalupdetetext}>메뉴 수정</Text>
+                </Pressable>
+                <Pressable
+                  onPress={onPressModalClose}
+                  style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>닫기</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -227,16 +269,23 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   Storetitleview: {
-    justifyContent: 'space-between',
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 20,
     paddingHorizontal: 5,
+    marginBottom: 10,
+    justifyContent: 'center', // 텍스트를 중앙에 배치
+    position: 'relative',
   },
   Storetitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
+  },
+  updateicons: {
+    position: 'absolute',
+    right: 4,
   },
   Storesubtitleview: {
     width: '45%',
@@ -347,6 +396,49 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'black',
     fontWeight: '400',
+  },
+
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '50%',
+    paddingVertical: 5,
+    paddingTop: 5,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modaltopview: {
+    width: '100%',
+  },
+  modalupdeteview: {
+    alignItems: 'center',
+  },
+  modalupdetetext: {
+    color: 'black',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 20,
+  },
+  line: {
+    marginHorizontal: '10%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  closeButton: {
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: 'black',
+    fontSize: 14,
+    fontWeight: 'bold',
+    paddingTop: 10,
+    paddingBottom: 6,
   },
 });
 

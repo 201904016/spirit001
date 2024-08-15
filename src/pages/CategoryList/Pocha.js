@@ -91,7 +91,6 @@ const Pocha = ({navigation}) => {
       .then(data => {
         if (data && data.data) {
           setStores(data.data);
-          console.log(data.data);
         }
       })
       .catch(error => console.error('Error:', error));
@@ -101,6 +100,7 @@ const Pocha = ({navigation}) => {
     <ScrollView style={{backgroundColor: 'white'}}>
       {stores.map(store => (
         <Pressable
+          key={store.storeId}
           onPress={() =>
             navigation.navigate('StoreStack', {
               screen: 'StoreMainPage',

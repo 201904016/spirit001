@@ -1,114 +1,135 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, Dimensions, Pressable} from 'react-native';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import CheckBox from '@react-native-community/checkbox';
+import {useRoute} from '@react-navigation/native';
 
 const MenuaddPage = () => {
-  const [menuName, setMenuName] = useState('');
-  const [price, setPrice] = useState('');
-  const [menuContent, setMenuContent] = useState('');
+  const route = useRoute();
+  const {storeId} = route.params;
+  const [token, setToken] = useState(null);
 
-  const handleMenuNameChange = text => {
-    setMenuName(text);
+  useEffect(() => {
+    const fetchToken = async () => {
+      const savedToken = await getToken();
+      setToken(savedToken); // 토큰을 가져온 후에 데이터 요청
+    };
+    fetchToken();
+  }, []);
+  const [menus, setMenus] = useState([
+    {menuName: '', price: '', menuContent: '', isSelected: false},
+  ]);
+
+  const handleMenuChange = (text, index, field) => {
+    const updatedMenus = [...menus];
+    updatedMenus[index][field] = text;
+    setMenus(updatedMenus);
   };
 
-  const handlePriceChange = text => {
-    setPrice(text);
+  const handleCheckBoxChange = (newValue, index) => {
+    const updatedMenus = [...menus];
+    updatedMenus[index].isSelected = newValue;
+    setMenus(updatedMenus);
   };
 
-  const handleMenuContentChange = text => {
-    setMenuContent(text);
-  };
-
-  const [isSelgitected, setIsSelected] = useState(false);
-  const handleCheckBoxChange = () => {
-    setIsSelected(!isSelgitected); // 선택 상태를 반전시킵니다.
+  const handleAddMenu = () => {
+    setMenus([
+      ...menus,
+      {menuName: '', price: '', menuContent: '', isSelected: false},
+    ]);
   };
 
   const MenuAdd = () => {
-    var data = {
-      menuName: menuName,
-      price: price,
-      menuContent: menuContent,
-      storeId: 1,
-    };
-    console.log(data + 'asd');
+    menus.forEach(menu => {
+      const data = {
+        menuName: menu.menuName,
+        price: menu.price,
+        menuContent: menu.menuContent,
+        storeId: storeId, // storeId는 고정된 값으로 유지되었습니다.
+      };
 
-    fetch('http://kymokim.iptime.org:11082/api/menu/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors',
-      credentials: 'include',
-      body: JSON.stringify(data),
-    })
-      .then(response => {
-        return response.json();
+      console.log(data, 'asd');
+
+      fetch('http://kymokim.iptime.org:11082/api/menu/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        mode: 'cors',
+        credentials: 'include',
+        body: JSON.stringify(data),
       })
-      .then(response => {
-        console.log(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+        .then(response => response.json())
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    });
   };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.menuTopView}>
-          <View style={styles.menuHeader}>
-            <Text style={styles.menuHeaderText}>메뉴 1</Text>
+        {menus.map((menu, index) => (
+          <View key={index} style={styles.menuTopView}>
+            <View style={styles.menuHeader}>
+              <Text style={styles.menuHeaderText}>메뉴 {index + 1}</Text>
+            </View>
+            <View style={styles.menuInputView}>
+              <Text style={styles.menuInputText}>메뉴 이름</Text>
+              <TextInput
+                style={styles.menuInput}
+                value={menu.menuName}
+                onChangeText={text => handleMenuChange(text, index, 'menuName')}
+                placeholder="메뉴 이름을 입력해주세요."
+              />
+            </View>
+            <View style={styles.menuInputView}>
+              <Text style={styles.menuInputText}>메뉴 가격</Text>
+              <TextInput
+                style={styles.menuInput}
+                value={menu.price}
+                onChangeText={text => handleMenuChange(text, index, 'price')}
+                placeholder="메뉴 가격을 입력해주세요."
+              />
+            </View>
+            <View style={styles.menuInputView}>
+              <Text style={styles.menuText}>메뉴 소개</Text>
+            </View>
+            <View style={styles.menuInputView}>
+              <TextInput
+                style={styles.textarea}
+                value={menu.menuContent}
+                onChangeText={text =>
+                  handleMenuChange(text, index, 'menuContent')
+                }
+                placeholder="메뉴 소개를 입력해주세요."
+              />
+            </View>
+            <View style={styles.checkBoxView}>
+              <CheckBox
+                value={menu.isSelected}
+                onValueChange={newValue =>
+                  handleCheckBoxChange(newValue, index)
+                }
+              />
+              <Text style={styles.checkBoxText}>대표 메뉴 설정</Text>
+            </View>
+            <View style={styles.menuAddImage}>
+              <Text style={styles.menuText}>메뉴 사진 추가하기 (최대 1장)</Text>
+            </View>
+            <View style={styles.line}></View>
           </View>
-          <View style={styles.menuInputView}>
-            <Text style={styles.menuInputText}>메뉴 이름</Text>
-            <TextInput
-              style={styles.menuInput}
-              value={menuName}
-              onChangeText={handleMenuNameChange}
-              placeholder="메뉴 이름을 입력해주세요."
-            />
-          </View>
-          <View style={styles.menuInputView}>
-            <Text style={styles.menuInputText}>메뉴 가격</Text>
-            <TextInput
-              style={styles.menuInput}
-              value={price}
-              onChangeText={handlePriceChange}
-              placeholder="메뉴 가격을 입력해주세요."
-            />
-          </View>
-          <View style={styles.menuInputView}>
-            <Text style={styles.menuText}>메뉴 소개</Text>
-          </View>
-          <View style={styles.menuInputView}>
-            <TextInput
-              style={styles.textarea}
-              value={menuContent}
-              onChangeText={handleMenuContentChange}
-              placeholder="메뉴 소개를 입력해주세요."
-            />
-          </View>
-          <View style={styles.checkBoxView}>
-            <CheckBox
-              value={isSelgitected} // 선택 상태를 prop으로 전달합니다.
-              onValueChange={handleCheckBoxChange} // 체크박스 변경 시 호출되는 함수를 지정합니다.
-            />
-            <Text style={styles.checkBoxText}>대표 메뉴 설정</Text>
-          </View>
-          <View style={styles.menuAddImage}>
-            <Text style={styles.menuText}>메뉴 사진 추가하기 (최대 1장)</Text>
-          </View>
-          <View style={styles.menuAddButton}>
-            <Text style={styles.menuAddText}>메뉴 추가</Text>
-          </View>
-          <View>
-            <Pressable style={styles.saveButton} onPress={MenuAdd}>
-              <Text style={styles.saveButtonText}>작성 완료</Text>
-            </Pressable>
-          </View>
-        </View>
+        ))}
+        <Pressable style={styles.menuAddButton} onPress={handleAddMenu}>
+          <Text style={styles.menuAddText}>메뉴 추가</Text>
+        </Pressable>
+        <Pressable style={styles.saveButton} onPress={MenuAdd}>
+          <Text style={styles.saveButtonText}>작성 완료</Text>
+        </Pressable>
       </ScrollView>
     </View>
   );
@@ -154,6 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 1,
     flex: 1,
+    paddingLeft: 10,
   },
   menuAddImage: {
     flexDirection: 'row',
@@ -187,6 +209,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   saveButton: {
+    left: '10%',
     width: '80%',
     marginBottom: 10,
     marginTop: 30,
@@ -204,6 +227,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     color: 'white',
     width: '20%',
+    left: '40%',
     height: 30,
     fontSize: 12,
     borderWidth: 1, // 외곽선 두께
@@ -222,6 +246,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     maxHeight: 200,
     marginBottom: 10,
+    paddingLeft: 10,
+  },
+  line: {
+    // borderTopWidth: 1,
+    // borderColor: 'lightgray',
+    width: '100%',
+    marginVertical: 20,
+    marginBottom: 10,
+    paddingVertical: 4,
+    backgroundColor: '#F2F2F2',
   },
 });
 

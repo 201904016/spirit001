@@ -14,6 +14,7 @@ import Geolocation from '@react-native-community/geolocation';
 import SearchPage from './SearchPage';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
+import MapCategory from '../../hooks/MapCategory';
 
 const MapPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
@@ -246,18 +247,18 @@ const MapPage = ({navigation}) => {
               </View>
 
               <View style={styles.category}>
-                <Text style={styles.storeAddress}>
-                  {selectedStore.firstCategory}
-                </Text>
-                <Text style={styles.storeAddress}>
-                  {selectedStore.secondCategory}
-                </Text>
-                <Text style={styles.storeAddress}>
-                  {selectedStore.thirdCategory}
-                </Text>
+                {selectedStore.categories.slice(0, 3).map((category, index) => (
+                  <MapCategory
+                    key={index}
+                    categories={[category]}
+                    style={styles.StoreCategory}
+                  />
+                ))}
               </View>
               <View style={styles.timeview}>
-                <Text style={styles.timeviewtext}>영업종료 02:00</Text>
+                <Text style={styles.timeviewtext}>
+                  영업종료 {selectedStore.closeHour.slice(0, 5)}
+                </Text>
               </View>
               <Text style={styles.menutext}>대표메뉴 : 스케쥴 기미</Text>
             </View>
@@ -274,6 +275,12 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+  },
+  StoreCategory: {
+    top: 1,
+    fontSize: 15,
+    color: 'black',
+    marginRight: 5,
   },
   buttonTop: {
     position: 'absolute',
@@ -342,7 +349,7 @@ const styles = StyleSheet.create({
   },
   category: {
     flexDirection: 'row',
-    marginBottom: 3,
+    marginBottom: 5,
   },
   storeName: {
     fontSize: 18,

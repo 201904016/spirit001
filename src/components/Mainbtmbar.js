@@ -71,7 +71,7 @@ const Mainbtmbar = () => {
         name="LikePage"
         component={LikePage}
         options={({navigation}) => ({
-          tabBarLabel: '저장',
+          tabBarLabel: '찜',
           title: '찜',
           headerLeft: () => (
             <Pressable onPress={() => navigation.navigate(MainPage)}>

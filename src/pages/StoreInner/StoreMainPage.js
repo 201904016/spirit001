@@ -34,6 +34,15 @@ const StoreMainPage = ({navigation}) => {
     setIsModalVisible(false);
   };
 
+  const handlePress = index => {
+    if (index == 0) {
+      navigation.navigate('UpdateStore', {storeId: storeId});
+    } else {
+      navigation.navigate('UpdateStore', {storeId: storeId});
+    }
+    onPressModalClose();
+  };
+
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
@@ -223,11 +232,15 @@ const StoreMainPage = ({navigation}) => {
           <View style={styles.modalContainer}>
             <View style={styles.modaltopview}>
               <View>
-                <Pressable style={styles.modalupdeteview}>
+                <Pressable
+                  style={styles.modalupdeteview}
+                  onPress={() => handlePress(0)}>
                   <Text style={styles.modalupdetetext}>매장 수정</Text>
                 </Pressable>
                 <View style={styles.line}></View>
-                <Pressable style={styles.modalupdeteview}>
+                <Pressable
+                  style={styles.modalupdeteview}
+                  onPress={() => handlePress(1)}>
                   <Text style={styles.modalupdetetext}>메뉴 수정</Text>
                 </Pressable>
                 <Pressable

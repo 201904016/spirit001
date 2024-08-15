@@ -5,6 +5,8 @@ import StoreMainPage from '../pages/StoreInner/StoreMainPage';
 import MenuaddPage from '../pages/StoreInner/MenuaddPage';
 import CommonRiviewPage from '../pages/StoreInner/CommonRiviewPage';
 import ReceiptRiviewPage from '../pages/StoreInner/ReceiptRiviewPage';
+import UpdateMenu from '../pages/StoreInner/UpdateMenu';
+import UpdateStore from '../pages/StoreInner/UpdateStore';
 
 const Stack = createStackNavigator();
 
@@ -30,6 +32,16 @@ export default function StoreStack() {
         name="ReceiptRiviewPage"
         component={ReceiptRiviewPage}
         options={{title: '영수증 리뷰'}}
+      />
+      <Stack.Screen
+        name="UpdateMenu"
+        component={UpdateMenu}
+        options={{title: '메뉴 수정하기'}}
+      />
+      <Stack.Screen
+        name="UpdateStore"
+        component={UpdateStore}
+        options={{title: '매장 수정하기'}}
       />
     </Stack.Navigator>
   );

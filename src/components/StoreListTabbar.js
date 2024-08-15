@@ -33,6 +33,11 @@ const StoreListTabbar = () => {
         tabBarScrollEnabled: true,
         tabBarItemStyle: {width: 100},
         swipeEnabled: false,
+        tabBarActiveTintColor: '#80D2F4', // 선택된 탭 글자 색상
+        tabBarIndicatorStyle: {
+          backgroundColor: '#80D2F4', // 선택된 탭 아래의 인디케이터 색상
+        },
+        tabBarInactiveTintColor: '#CFCFCF', // 선택되지 않은 탭 글자 색상
       }}>
       <Tab.Screen
         name="Izakaya"

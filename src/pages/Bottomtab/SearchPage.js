@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {Text, View, StyleSheet, Line} from 'react-native';
+import {Text, View, StyleSheet, Line, ImageBackground} from 'react-native';
 import Postcode from '@actbase/react-daum-postcode';
 import axios from 'axios';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const SearchPage = () => {
   return (
@@ -49,9 +50,28 @@ const SearchPage = () => {
 
       <View style={styles.horizontalDivider} />
 
-      <View>
-        <Text>내 주변 실시간 검색 TOP 5</Text>
+      <View style={styles.storeView}>
+        <View>
+          <Text style={styles.storeText}>내 주변 인기 매장 TOP 5</Text>
+        </View>
+        <ScrollView
+          horizontal={true} // 가로 스크롤 가능하도록 설정
+          showsHorizontalScrollIndicator={false} // 스크롤바 표시 여부 설정
+          contentContainerStyle={styles.scrollViewContent} // 스크롤뷰 내부 컨텐츠 스타일 설정
+        >
+          <View style={styles.backimageview}>
+            <ImageBackground
+              source={require('../../assets/MainPagetodayimg.png')}
+              style={styles.backimage}
+              imageStyle={styles.backimagestyle}
+            />
+            <View>
+              <Text>안녕</Text>
+            </View>
+          </View>
+        </ScrollView>
       </View>
+
       <View>
         <Text>식당 목록</Text>
       </View>
@@ -121,6 +141,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0', // 선의 색상
     marginVertical: 10, // 상하 간격
     width: '90%',
+  },
+  textViwe: {
+    marginTop: 30,
+    alignItems: 'flex-start',
+  },
+  storeView: {
+    marginTop: 30,
+    width: '90%',
+    marginLeft: 10,
+  },
+  storeText: {
+    marginTop: 10,
+    fontSize: 15,
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  backimageview: {
+    width: 150,
+    height: 150,
+    marginTop: 20,
+    marginRight: 10,
+    marginLeft: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backimage: {
+    width: 150,
+    height: 150,
+    resizeMode: 'contain',
+  },
+  backimagestyle: {
+    borderRadius: 20,
   },
 });
 

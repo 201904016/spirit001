@@ -1,10 +1,17 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Dimensions, Pressable} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Pressable,
+  Alert,
+} from 'react-native';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import CheckBox from '@react-native-community/checkbox';
 import {useRoute} from '@react-navigation/native';
 
-const MenuaddPage = () => {
+const MenuaddPage = ({navigation}) => {
   const route = useRoute();
   const {storeId} = route.params;
   const [token, setToken] = useState(null);
@@ -64,6 +71,20 @@ const MenuaddPage = () => {
         .then(response => response.json())
         .then(response => {
           console.log(response.data);
+          Alert.alert(
+            '등록이 완료되었습니다.',
+            '',
+            [
+              {
+                text: '확인',
+                style: 'destructive',
+                onPress: () => {
+                  navigation.navigate('MainPage');
+                },
+              },
+            ],
+            {cancelable: false},
+          );
         })
         .catch(error => {
           console.error(error);

@@ -1,5 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Pressable, Image, Modal} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Image,
+  Modal,
+  Alert,
+} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useRoute} from '@react-navigation/native';
@@ -12,13 +20,65 @@ const StoreMenuPage = ({navigation}) => {
   const [token, setToken] = useState(null);
   const [menus, setMenus] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedMenuId, setSelectedMenuId] = useState(null);
 
-  const onPressModalOpen = () => {
+  const onPressModalOpen = menuId => {
+    setSelectedMenuId(menuId); // 선택한 메뉴 ID를 상태로 저장
     setIsModalVisible(true);
   };
 
   const onPressModalClose = () => {
     setIsModalVisible(false);
+    setSelectedMenuId(null);
+  };
+
+  const opendeletemenu = () => {
+    Alert.alert(
+      '삭제하시겠습니까?',
+      '',
+      [
+        {
+          text: '확인',
+          style: 'destructive',
+          onPress: () => {
+            fetch(
+              `http://kymokim.iptime.org:11082/api/menu/delete/${selectedMenuId}`,
+              {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-auth-token': token,
+                },
+              },
+            )
+              .then(response => response.json())
+              .then(data => {
+                Alert.alert(
+                  '삭제되었습니다.',
+                  '',
+                  [
+                    {
+                      text: '확인',
+                      style: 'destructive',
+                      onPress: () => {
+                        setIsModalVisible(false);
+                        navigation.navigate('MainPage');
+                      },
+                    },
+                  ],
+                  {cancelable: false},
+                );
+              })
+              .catch(error => console.error('Error:', error));
+          },
+        },
+        {
+          text: '취소',
+          style: 'destructive',
+        },
+      ],
+      {cancelable: true},
+    );
   };
 
   const toggleExpand = () => {
@@ -27,7 +87,7 @@ const StoreMenuPage = ({navigation}) => {
 
   const handlePress = index => {
     if (index == 0) {
-      navigation.navigate('UpdateMenu', {storeId: storeId});
+      navigation.navigate('UpdateMenu', {menuId: selectedMenuId});
     }
     onPressModalClose();
   };
@@ -102,7 +162,10 @@ const StoreMenuPage = ({navigation}) => {
                   }}>
                   <Text style={styles.Signaturetitle}>{menu.menuName}</Text>
                   <Pressable
-                    onPress={onPressModalOpen}
+                    onPress={() => {
+                      console.log('Before opening modal, menuId:', menu.menuId); // menuId 로그 출력
+                      onPressModalOpen(menu.menuId); // menuId 전달
+                    }}
                     style={styles.updateicons}>
                     <MaterialCommunityIcons
                       name={'dots-vertical'}
@@ -149,7 +212,10 @@ const StoreMenuPage = ({navigation}) => {
                   }}>
                   <Text style={styles.Signaturetitle}>{menu.menuName}</Text>
                   <Pressable
-                    onPress={onPressModalOpen}
+                    onPress={() => {
+                      console.log('Before opening modal, menuId:', menu.menuId); // menuId 로그 출력
+                      onPressModalOpen(menu.menuId); // menuId 전달
+                    }}
                     style={styles.updateicons}>
                     <MaterialCommunityIcons
                       name={'dots-vertical'}
@@ -169,27 +235,37 @@ const StoreMenuPage = ({navigation}) => {
               </View>
             </View>
           ))}
-      </View>
-      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modaltopview}>
-              <View>
-                <Pressable
-                  style={styles.modalupdeteview}
-                  onPress={() => handlePress(0)}>
-                  <Text style={styles.modalupdetetext}>메뉴 수정</Text>
-                </Pressable>
-                <Pressable
-                  onPress={onPressModalClose}
-                  style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>닫기</Text>
-                </Pressable>
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={true}>
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modaltopview}>
+                <View>
+                  <Pressable
+                    style={styles.modalupdeteview}
+                    onPress={() => {
+                      // menuId 로그 출력
+                      handlePress(0);
+                    }}>
+                    <Text style={styles.modalupdetetext}>메뉴 수정</Text>
+                  </Pressable>
+                  <View style={styles.line}></View>
+                  <Pressable onPress={opendeletemenu} style={styles.deleButton}>
+                    <Text style={styles.deleButtonText}>메뉴 삭제</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={onPressModalClose}
+                    style={styles.closeButton}>
+                    <Text style={styles.closeButtonText}>닫기</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      </View>
     </View>
   );
 };
@@ -323,6 +399,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingTop: 10,
     paddingBottom: 6,
+  },
+  deleButton: {
+    alignItems: 'center',
+  },
+  deleButtonText: {
+    color: 'red',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 20,
   },
 });
 

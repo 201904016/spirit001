@@ -6,6 +6,7 @@ import {
   ImageBackground,
   StyleSheet,
   Modal,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
@@ -72,6 +73,55 @@ const StoreMainPage = ({navigation}) => {
     };
     fetchToken();
   }, [storeId]);
+
+  const opendeletestore = () => {
+    Alert.alert(
+      '삭제하시겠습니까?',
+      '',
+      [
+        {
+          text: '확인',
+          style: 'destructive',
+          onPress: () => {
+            fetch(
+              `http://kymokim.iptime.org:11082/api/store/delete/${storeId}`,
+              {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-auth-token': token,
+                },
+              },
+            )
+              .then(response => response.json())
+              .then(data => {
+                Alert.alert(
+                  '삭제되었습니다.',
+                  '',
+                  [
+                    {
+                      text: '확인',
+                      style: 'destructive',
+                      onPress: () => {
+                        setIsModalVisible(false);
+                        navigation.navigate('MainPage');
+                      },
+                    },
+                  ],
+                  {cancelable: false},
+                );
+              })
+              .catch(error => console.error('Error:', error));
+          },
+        },
+        {
+          text: '취소',
+          style: 'destructive',
+        },
+      ],
+      {cancelable: true},
+    );
+  };
 
   const getStoreData = token => {
     console.log(token);
@@ -228,6 +278,10 @@ const StoreMainPage = ({navigation}) => {
                   style={styles.modalupdeteview}
                   onPress={() => handlePress(0)}>
                   <Text style={styles.modalupdetetext}>매장 수정</Text>
+                </Pressable>
+                <View style={styles.line}></View>
+                <Pressable onPress={opendeletestore} style={styles.deleButton}>
+                  <Text style={styles.deleButtonText}>메장 삭제</Text>
                 </Pressable>
                 <Pressable
                   onPress={onPressModalClose}
@@ -454,6 +508,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingTop: 10,
     paddingBottom: 6,
+  },
+  deleButton: {
+    alignItems: 'center',
+  },
+  deleButtonText: {
+    color: 'red',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 20,
   },
 });
 

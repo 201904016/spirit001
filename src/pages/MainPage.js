@@ -328,9 +328,9 @@ const MainPage = ({navigation}) => {
         />
       </View>
       <View style={styles.todayPhrasesView}>
-        <Text style={styles.mylocationlivetext}>제일 가까운 주점은?</Text>
+        <Text style={styles.mylocationlivetext}>현재 영업 중인 주점은?</Text>
         <Text style={styles.mylocationlivesubtext}>
-          현재 위치에서 가장 가까운 주점을 알려드려요
+          현재 위치에서 내 근처 영업 중인 주점을 알려드려요
         </Text>
       </View>
       <View>

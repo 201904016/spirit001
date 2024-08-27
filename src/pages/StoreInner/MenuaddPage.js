@@ -17,7 +17,7 @@ const MenuaddPage = () => {
     fetchToken();
   }, []);
   const [menus, setMenus] = useState([
-    {menuName: '', price: '', menuContent: '', isSelected: false},
+    {menuName: '', price: '', menuContent: '', main: false},
   ]);
 
   const handleMenuChange = (text, index, field) => {
@@ -28,14 +28,14 @@ const MenuaddPage = () => {
 
   const handleCheckBoxChange = (newValue, index) => {
     const updatedMenus = [...menus];
-    updatedMenus[index].isSelected = newValue;
+    updatedMenus[index].main = newValue;
     setMenus(updatedMenus);
   };
 
   const handleAddMenu = () => {
     setMenus([
       ...menus,
-      {menuName: '', price: '', menuContent: '', isSelected: false},
+      {menuName: '', price: '', menuContent: '', main: false},
     ]);
   };
 
@@ -45,6 +45,7 @@ const MenuaddPage = () => {
         menuName: menu.menuName,
         price: menu.price,
         menuContent: menu.menuContent,
+        main: menu.main,
         storeId: storeId, // storeId는 고정된 값으로 유지되었습니다.
       };
 
@@ -111,7 +112,7 @@ const MenuaddPage = () => {
             </View>
             <View style={styles.checkBoxView}>
               <CheckBox
-                value={menu.isSelected}
+                value={menu.main}
                 onValueChange={newValue =>
                   handleCheckBoxChange(newValue, index)
                 }

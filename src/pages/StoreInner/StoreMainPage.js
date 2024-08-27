@@ -21,7 +21,7 @@ import Categorytrans from '../../hooks/Categorytrans';
 
 const StoreMainPage = ({navigation}) => {
   const route = useRoute();
-  const {storeId} = route.params;
+  const {storeId, innerlatitude, innerlongitude} = route.params;
   const [token, setToken] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -36,9 +36,9 @@ const StoreMainPage = ({navigation}) => {
 
   const handlePress = index => {
     if (index == 0) {
-      navigation.navigate('UpdateStore', {storeId: storeId});
-    } else {
-      navigation.navigate('UpdateStore', {storeId: storeId});
+      navigation.navigate('UpdateStore', {
+        storeId: storeId,
+      });
     }
     onPressModalClose();
   };
@@ -70,36 +70,40 @@ const StoreMainPage = ({navigation}) => {
       setToken(savedToken);
       getStoreData(savedToken); // 토큰을 가져온 후에 데이터 요청
     };
+    fetchToken();
+  }, [storeId]);
 
-    const getStoreData = token => {
-      console.log(token);
-      fetch(`http://kymokim.iptime.org:11082/api/store/get/${storeId}`, {
+  const getStoreData = token => {
+    console.log(token);
+    fetch(
+      `http://kymokim.iptime.org:11082/api/store/get/${storeId}?latitude=${innerlatitude}&longitude=${innerlongitude}`,
+      {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-token': token,
         },
+      },
+    )
+      .then(response => response.json())
+      .then(data => {
+        const storeData = data.data || {}; // 데이터가 없으면 빈 객체로 초기화
+        const categories = storeData.categories || []; // categories가 없으면 빈 배열로 초기화
+        setStoreName(storeData.storeName || '');
+        setCategorys(categories);
+        setAddress(storeData.address || '');
+        setOpenHour(storeData.openHour || '');
+        setCloseHour(storeData.closeHour || '');
+        setIongitude(storeData.longitude || '');
+        setLititude(storeData.latitude || '');
+        setStoreRate(storeData.storeRate || '');
+        setReviewCount(storeData.reviewCount || '');
+        setStoreLikeCount(storeData.storeLikeCount || '');
+        setStoreContent(storeData.storeContent || '');
+        console.log('Menu List:', storeData.menuList || []);
       })
-        .then(response => response.json())
-        .then(data => {
-          const categories = data.data.categories;
-          setStoreName(data.data.storeName);
-          setCategorys(categories);
-          setAddress(data.data.address);
-          setOpenHour(data.data.openHour);
-          setCloseHour(data.data.closeHour);
-          setIongitude(data.data.longitude);
-          setLititude(data.data.latitude);
-          setStoreRate(data.data.storeRate);
-          setReviewCount(data.data.reviewCount);
-          setStoreLikeCount(data.data.storeLikeCount);
-          setStoreContent(data.data.storeContent);
-          console.log(data.data.menuList);
-        })
-        .catch(error => console.error('Error:', error));
-    };
-    fetchToken();
-  }, []);
+      .catch(error => console.error('Error:', error));
+  };
 
   const translatedCategories = Categorytrans({categories: categorys});
 
@@ -215,18 +219,6 @@ const StoreMainPage = ({navigation}) => {
           <Text style={styles.StoreButtonText}>길찾기</Text>
         </Pressable>
       </View>
-
-      <View>
-        {currentPage === 'StoreMenuPage' && (
-          <StoreMenuPage navigation={navigation} storeId={storeId} />
-        )}
-        {currentPage === 'StoreRiviewPage' && (
-          <StoreRiviewPage navigation={navigation} />
-        )}
-        {currentPage === 'StoreMapPage' && (
-          <StoreMapPage navigation={navigation} />
-        )}
-      </View>
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
@@ -236,12 +228,6 @@ const StoreMainPage = ({navigation}) => {
                   style={styles.modalupdeteview}
                   onPress={() => handlePress(0)}>
                   <Text style={styles.modalupdetetext}>매장 수정</Text>
-                </Pressable>
-                <View style={styles.line}></View>
-                <Pressable
-                  style={styles.modalupdeteview}
-                  onPress={() => handlePress(1)}>
-                  <Text style={styles.modalupdetetext}>메뉴 수정</Text>
                 </Pressable>
                 <Pressable
                   onPress={onPressModalClose}
@@ -253,6 +239,22 @@ const StoreMainPage = ({navigation}) => {
           </View>
         </View>
       </Modal>
+      <View>
+        {currentPage === 'StoreMenuPage' && (
+          <StoreMenuPage
+            navigation={navigation}
+            storeId={storeId}
+            innerlatitude={innerlatitude}
+            innerlongitude={innerlongitude}
+          />
+        )}
+        {currentPage === 'StoreRiviewPage' && (
+          <StoreRiviewPage navigation={navigation} />
+        )}
+        {currentPage === 'StoreMapPage' && (
+          <StoreMapPage navigation={navigation} />
+        )}
+      </View>
     </ScrollView>
   );
 };
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
   },
   updateicons: {
     position: 'absolute',
-    right: 4,
+    right: 10,
   },
   Storesubtitleview: {
     width: '45%',

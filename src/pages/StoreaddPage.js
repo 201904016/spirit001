@@ -129,7 +129,7 @@ const StoreaddPage = ({navigation, route}) => {
       storeName: storeName,
       categories: [firstcategory, secondcategory, thirdcategory],
       address: address,
-      detailedAddress: detailedAddress,
+      addressDetail: detailedAddress,
       storeNumber: storeNumber,
       storeContent: storeContent,
       openHour: `${selectedOpenHour}:${selectedOpenMinute}`,
@@ -139,6 +139,7 @@ const StoreaddPage = ({navigation, route}) => {
       longitude: coords.longitude,
       latitude: coords.latitude,
     };
+    console.log(data);
 
     fetch('http://kymokim.iptime.org:11082/api/store/create', {
       method: 'POST',
@@ -152,42 +153,29 @@ const StoreaddPage = ({navigation, route}) => {
     })
       .then(response => {
         if (response.status != 200) {
-          Alert.alert(
-            '안됨',
-            '',
-            [
-              {
-                text: '확인',
-                style: 'destructive',
-              },
-            ],
-            {cancelable: false},
-          );
-          return;
-        } else {
-          return response.json();
+          Alert.alert('안됨', '', [{text: '확인', style: 'destructive'}], {
+            cancelable: false,
+          });
+          throw new Error('Request failed');
         }
-      })
-      .then(response => {
-        if (response) {
-          Alert.alert(
-            '등록이 완료되었습니다.',
-            '',
-            [
-              {
-                text: '확인',
-                style: 'destructive',
-                onPress: () => {
-                  navigation.navigate('MainPage');
-                },
-              },
-            ],
-            {cancelable: false},
-          );
-        }
+        return response.json(); // 여기서 JSON 응답 반환
       })
       .then(data => {
         console.log(data);
+        Alert.alert(
+          '등록이 완료되었습니다.',
+          '',
+          [
+            {
+              text: '확인',
+              style: 'destructive',
+              onPress: () => {
+                navigation.navigate('MainPage');
+              },
+            },
+          ],
+          {cancelable: false},
+        );
       })
       .catch(error => {
         console.error(error);

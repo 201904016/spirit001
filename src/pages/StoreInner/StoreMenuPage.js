@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Pressable, Image} from 'react-native';
+import {View, Text, StyleSheet, Pressable, Image, Modal} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useRoute} from '@react-navigation/native';
 import {getToken} from '../../store/Storage';
@@ -7,12 +8,28 @@ import {getToken} from '../../store/Storage';
 const StoreMenuPage = ({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const route = useRoute();
-  const {storeId} = route.params;
+  const {storeId, innerlatitude, innerlongitude} = route.params;
   const [token, setToken] = useState(null);
   const [menus, setMenus] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const onPressModalOpen = () => {
+    setIsModalVisible(true);
+  };
+
+  const onPressModalClose = () => {
+    setIsModalVisible(false);
+  };
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const handlePress = index => {
+    if (index == 0) {
+      navigation.navigate('UpdateMenu', {storeId: storeId});
+    }
+    onPressModalClose();
   };
 
   useEffect(() => {
@@ -21,24 +38,32 @@ const StoreMenuPage = ({navigation}) => {
       setToken(savedToken);
       getStoreData(savedToken);
     };
+    fetchToken();
+  }, []);
 
-    const getStoreData = savedToken => {
-      fetch(`http://kymokim.iptime.org:11082/api/store/get/${storeId}`, {
+  const getStoreData = savedToken => {
+    fetch(
+      `http://kymokim.iptime.org:11082/api/store/get/${storeId}?latitude=${innerlatitude}&longitude=${innerlongitude}`,
+      {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-token': savedToken,
         },
-      })
-        .then(response => response.json())
-        .then(data => {
-          const categories = data.data.categories;
+      },
+    )
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.data && data.data.menuList) {
           setMenus(data.data.menuList);
-        })
-        .catch(error => console.error('Error:', error));
-    };
-    fetchToken();
-  }, []);
+          console.log('Menu List:', data.data.menuList);
+        } else {
+          console.log('Menu List not found');
+          setMenus([]); // 빈 배열로 초기화
+        }
+      })
+      .catch(error => console.error('Error:', error));
+  };
 
   return (
     <View style={styles.zz}>
@@ -55,94 +80,116 @@ const StoreMenuPage = ({navigation}) => {
         <View style={styles.SignatureTextView}>
           <Text style={styles.SignatureText}>대표메뉴</Text>
         </View>
-        <View style={styles.SignatureMenuView}>
-          <View style={styles.Signatureimgview}>
-            <Image
-              source={require('../../assets/kim.png')}
-              style={styles.Signatureimg}
-            />
-          </View>
-          <View style={styles.SignatureMenuTextsview}>
-            <Text style={styles.Signaturetitle}>스케줄 김치 볶음밥</Text>
-            <Pressable onPress={toggleExpand}>
-              <Text
-                style={styles.Signaturecontent}
-                numberOfLines={isExpanded ? null : 2}>
-                튀긴 호박 고구마가 들어간 청담동에서 가장맛있는 김치볶음밥
-              </Text>
-            </Pressable>
-            <Text style={styles.Signatureprice}>10,000 원</Text>
-          </View>
-        </View>
-        <View style={styles.SignatureMenuView}>
-          <View style={styles.Signatureimgview}>
-            <Image
-              source={require('../../assets/kim.png')}
-              style={styles.Signatureimg}
-            />
-          </View>
-          <View style={styles.SignatureMenuTextsview}>
-            <Text style={styles.Signaturetitle}>스케줄 김치 볶음밥</Text>
-            <Pressable onPress={toggleExpand}>
-              <Text
-                style={styles.Signaturecontent}
-                numberOfLines={isExpanded ? null : 2}>
-                튀긴 호박 고구마가 들어간 청담동에서 가장맛있는 김치볶음밥
-              </Text>
-            </Pressable>
-            <Text style={styles.Signatureprice}>10,000 원</Text>
-          </View>
-        </View>
-        <View style={styles.SignatureMenuView}>
-          <View style={styles.Signatureimgview}>
-            <Image
-              source={require('../../assets/kim.png')}
-              style={styles.Signatureimg}
-            />
-          </View>
-          <View style={styles.SignatureMenuTextsview}>
-            <Text style={styles.Signaturetitle}>스케줄 김치 볶음밥</Text>
-            <Pressable onPress={toggleExpand}>
-              <Text
-                style={styles.Signaturecontent}
-                numberOfLines={isExpanded ? null : 2}>
-                튀긴 호박 고구마가 들어간 청담동에서 가장맛있는 김치볶음밥
-              </Text>
-            </Pressable>
-            <Text style={styles.Signatureprice}>10,000 원</Text>
-          </View>
-        </View>
+        {menus
+          .filter(menu => menu.isMain)
+          .map(menu => (
+            <View style={styles.SignatureMenuView}>
+              <View style={styles.Signatureimgview}>
+                <Image
+                  source={
+                    menu.imgUrl
+                      ? {uri: menu.imgUrl}
+                      : require('../../assets/kim.png')
+                  }
+                  style={styles.Signatureimg}
+                />
+              </View>
+              <View style={styles.SignatureMenuTextsview}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <Text style={styles.Signaturetitle}>{menu.menuName}</Text>
+                  <Pressable
+                    onPress={onPressModalOpen}
+                    style={styles.updateicons}>
+                    <MaterialCommunityIcons
+                      name={'dots-vertical'}
+                      size={17}
+                      color={'black'}
+                    />
+                  </Pressable>
+                </View>
+                <Pressable onPress={toggleExpand}>
+                  <Text
+                    style={styles.Signaturecontent}
+                    numberOfLines={isExpanded ? null : 2}>
+                    {menu.menuContent}
+                  </Text>
+                </Pressable>
+                <Text style={styles.Signatureprice}>{menu.price} 원</Text>
+              </View>
+            </View>
+          ))}
       </View>
       <View style={styles.MenuTopView}>
         <View style={styles.SignatureTextView}>
           <Text style={styles.MenuText}>메뉴</Text>
         </View>
-        {menus.map(menu => (
-          <View style={styles.SignatureMenuView}>
-            <View style={styles.Signatureimgview}>
-              <Image
-                source={
-                  menu.imgUrl
-                    ? {uri: menu.imgUrl}
-                    : require('../../assets/kim.png')
-                }
-                style={styles.Signatureimg}
-              />
+        {menus
+          .filter(menu => menu.isMain === null || menu.isMain === false)
+          .map(menu => (
+            <View style={styles.SignatureMenuView}>
+              <View style={styles.Signatureimgview}>
+                <Image
+                  source={
+                    menu.imgUrl
+                      ? {uri: menu.imgUrl}
+                      : require('../../assets/kim.png')
+                  }
+                  style={styles.Signatureimg}
+                />
+              </View>
+              <View style={styles.SignatureMenuTextsview}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <Text style={styles.Signaturetitle}>{menu.menuName}</Text>
+                  <Pressable
+                    onPress={onPressModalOpen}
+                    style={styles.updateicons}>
+                    <MaterialCommunityIcons
+                      name={'dots-vertical'}
+                      size={17}
+                      color={'black'}
+                    />
+                  </Pressable>
+                </View>
+                <Pressable onPress={toggleExpand}>
+                  <Text
+                    style={styles.Signaturecontent}
+                    numberOfLines={isExpanded ? null : 2}>
+                    {menu.menuContent}
+                  </Text>
+                </Pressable>
+                <Text style={styles.Signatureprice}>{menu.price} 원</Text>
+              </View>
             </View>
-            <View style={styles.SignatureMenuTextsview}>
-              <Text style={styles.Signaturetitle}>{menu.menuName}</Text>
-              <Pressable onPress={toggleExpand}>
-                <Text
-                  style={styles.Signaturecontent}
-                  numberOfLines={isExpanded ? null : 2}>
-                  {menu.menuContent}
-                </Text>
-              </Pressable>
-              <Text style={styles.Signatureprice}>{menu.price} 원</Text>
+          ))}
+      </View>
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modaltopview}>
+              <View>
+                <Pressable
+                  style={styles.modalupdeteview}
+                  onPress={() => handlePress(0)}>
+                  <Text style={styles.modalupdetetext}>메뉴 수정</Text>
+                </Pressable>
+                <Pressable
+                  onPress={onPressModalClose}
+                  style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>닫기</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
-        ))}
-      </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -233,6 +280,49 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     marginTop: 30,
+  },
+
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '50%',
+    paddingVertical: 5,
+    paddingTop: 5,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modaltopview: {
+    width: '100%',
+  },
+  modalupdeteview: {
+    alignItems: 'center',
+  },
+  modalupdetetext: {
+    color: 'black',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 20,
+  },
+  line: {
+    marginHorizontal: '10%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  closeButton: {
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: 'black',
+    fontSize: 14,
+    fontWeight: 'bold',
+    paddingTop: 10,
+    paddingBottom: 6,
   },
 });
 

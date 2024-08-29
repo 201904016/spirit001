@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between', // 이름과 별점 사이 공간 추가
     alignItems: 'center',
-    width: 200, // 제한된 너비로 텍스트 줄임표 효과 강화
+    width: '80%',
   },
   StoreCategoryList: {
     flexDirection: 'row',
@@ -137,13 +137,16 @@ const styles = StyleSheet.create({
   },
 
   storeImage: {
-    width: 150,
-    height: 150,
+    width: 120,
+    height: 120,
     resizeMode: 'contain',
     borderRadius: 10,
   },
   text: {
-    left: '7%',
+    width: '80%',
+    marginLeft: 10,
+    justifyContent: 'space-between',
+    marginVertical: 1,
   },
   scoretext: {
     marginLeft: 3,
@@ -159,20 +162,17 @@ const styles = StyleSheet.create({
     maxWidth: 150, // 이름이 줄여지는 최대 너비 설정
   },
   StoreCategory: {
-    top: 10,
     fontWeight: 'bold',
     fontSize: 15,
     color: 'black',
     marginRight: 5,
   },
   StoreClose: {
-    top: 25,
     fontSize: 15,
     color: 'black',
     marginRight: 5,
   },
   StoreMain: {
-    top: 62,
     fontSize: 12,
     color: 'black',
   },

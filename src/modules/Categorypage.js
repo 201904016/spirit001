@@ -12,14 +12,20 @@ import {ScrollView} from 'react-native-gesture-handler';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Geolocation from '@react-native-community/geolocation';
+import {getLocation} from '../store/useLocation';
 
 const Categoryspage = ({navigation, categoryname}) => {
-  const [location, setLocation] = useState(null);
   const [stores, setStores] = useState([]);
   const [error, setError] = useState(null);
 
+  const [location, setLocation] = useState(null);
+
   useEffect(() => {
-    requestLocationPermission();
+    const fetchLocation = async () => {
+      const currentLocation = await getLocation(); // 캐시된 위치 가져오기
+      setLocation(currentLocation);
+    };
+    fetchLocation();
   }, []);
 
   useEffect(() => {
@@ -27,46 +33,6 @@ const Categoryspage = ({navigation, categoryname}) => {
       getStoreData();
     }
   }, [location]);
-
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          fetchLocation();
-        } else {
-          setError('위치 권한이 거부되었습니다.');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      fetchLocation(); // iOS에서는 권한 요청 없이 바로 위치 가져오기
-    }
-  };
-
-  const fetchLocation = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setLocation({latitude, longitude});
-        setError(null);
-      },
-      error => {
-        setError(error.message);
-      },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-    );
-  };
 
   const getStoreData = () => {
     if (!location) return;

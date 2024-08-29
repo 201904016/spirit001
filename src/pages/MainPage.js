@@ -2,21 +2,16 @@ import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   Pressable,
   View,
   Image,
-  TextInput,
   FlatList,
   Dimensions,
   ImageBackground,
   Modal,
-  Touchable,
-  TouchableOpacity,
-  Platform,
-  PermissionsAndroid,
+  RefreshControl,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
@@ -30,6 +25,13 @@ import StoreStack from '../components/StoreStack';
 
 import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
+import {
+  getLocation,
+  saveLocation,
+  fetchLocation,
+  requestLocationPermission,
+  useLocation,
+} from '../store/useLocation';
 
 const {width: screenWidth} = Dimensions.get('window');
 const imageWidth = screenWidth - 24 * 2;
@@ -38,16 +40,13 @@ const offset = imageWidth + imageMargin * 2;
 
 const MainPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
-  const [error, setError] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [weather, setWeather] = useState({
-    temp: 0,
-    condition: '',
-    rain_probability: 0,
-  });
 
   useEffect(() => {
-    requestLocationPermission();
+    const fetchLocation = async () => {
+      const currentLocation = await getLocation(); // 캐시된 위치 가져오기
+      setLocation(currentLocation);
+    };
+    fetchLocation();
   }, []);
 
   useEffect(() => {
@@ -55,51 +54,43 @@ const MainPage = ({navigation}) => {
       fetchWeatherData(location.latitude, location.longitude).then(() => {
         mainInfoSend();
       });
+    } else {
     }
   }, [location]);
 
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('You can use the location');
-          fetchLocation(); // 권한 허용 후 위치 가져오기
-        } else {
-          console.log('Location permission denied');
-          setError('위치 권한이 거부되었습니다.');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      fetchLocation(); // iOS에서는 권한 요청 없이 바로 위치 가져오기
+  const fetchWeatherData = async (latitude, longitude) => {
+    const API_KEY = 'be107a3be29e95b54b2fac69f2a42431';
+    const apiUrl = `http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`;
+
+    try {
+      const response = await axios.get(apiUrl);
+
+      const temp = response.data.main.temp;
+      const condition = response.data.weather[0].main;
+      const rain_probability = response.data.clouds.all;
+
+      setWeather({temp, condition, rain_probability});
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
     }
   };
 
-  const fetchLocation = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setLocation({latitude, longitude});
-        setError(null);
-      },
-      error => {
-        console.error(error);
-        setError(error.message);
-      },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-    );
+  const onRefresh = async () => {
+    const currentLocation = await useLocation(); // 캐시된 위치 가져오기
+    console.log(location);
+    setLocation(currentLocation);
+
+    setIsRefreshing(false); // 새로 고침 종료
   };
+
+  const [error, setError] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [weather, setWeather] = useState({
+    temp: 0,
+    condition: '',
+    rain_probability: 0,
+  });
 
   const onPressModalOpen = () => {
     setIsModalVisible(true);
@@ -168,25 +159,12 @@ const MainPage = ({navigation}) => {
       });
   };
 
-  const fetchWeatherData = async (latitude, longitude) => {
-    const API_KEY = 'be107a3be29e95b54b2fac69f2a42431';
-    const apiUrl = `http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`;
-
-    try {
-      const response = await axios.get(apiUrl);
-
-      const temp = response.data.main.temp;
-      const condition = response.data.weather[0].main;
-      const rain_probability = response.data.clouds.all;
-
-      setWeather({temp, condition, rain_probability});
-    } catch (error) {
-      console.error('Error fetching weather data:', error);
-    }
-  };
-
   return (
-    <ScrollView style={styles.MainView}>
+    <ScrollView
+      style={styles.MainView}
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+      }>
       <View style={styles.topbar}>
         <Ionicons name={'list'} size={30} color={'black'} />
         <Image
@@ -204,7 +182,7 @@ const MainPage = ({navigation}) => {
           style={styles.todayimage}
         />
       </View>
-      {weather.condition !== 0 && (
+      {weather.condition ? (
         <View style={styles.topdayweather}>
           <Text style={styles.todayweathertext}>
             현재 온도: {weather.temp}°C
@@ -215,6 +193,8 @@ const MainPage = ({navigation}) => {
             강수 확률: {weather.rain_probability}%
           </Text>
         </View>
+      ) : (
+        <Text style={styles.notWeathertext}>날씨 정보 가져오는 중...</Text>
       )}
       {/* {location && (
         <View style={styles.topdayweather}>
@@ -532,7 +512,7 @@ const categories = [
     text: '중화주점',
   },
   {
-    source: require('../assets/free-icon-barbecue-4039250.png'),
+    source: require('../assets/bar-counter_3822705.png'),
     text: '감성주점',
   },
   {
@@ -714,6 +694,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   todayweathertext: {
+    fontSize: 12,
+    color: 'black',
+    marginBottom: 7,
+  },
+  notWeathertext: {
+    alignSelf: 'center',
     fontSize: 12,
     color: 'black',
     marginBottom: 7,

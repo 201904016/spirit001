@@ -11,6 +11,7 @@ import {
   Pressable,
   Modal,
   Image,
+  RefreshControl,
 } from 'react-native';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -20,8 +21,27 @@ import {Picker} from '@react-native-picker/picker';
 import Geolocation from '@react-native-community/geolocation';
 import MapCategory from '../../hooks/MapCategory';
 import SearchStack from '../../components/SearchStack';
+import {getLocation, useLocation} from '../../store/useLocation';
 
 const SearchPage = ({navigation}) => {
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      const currentLocation = await getLocation(); // 캐시된 위치 가져오기
+      setLocation(currentLocation);
+    };
+    fetchLocation();
+  }, []);
+
+  const onRefresh = async () => {
+    const currentLocation = await useLocation(); // 캐시된 위치 가져오기
+    console.log(location);
+    setLocation(currentLocation);
+
+    setIsRefreshing(false); // 새로 고침 종료
+  };
+
   const [isModalVisible, setModalVisible] = useState(false);
   const [peopleModalVisible, setPeopleModalVisible] = useState(false);
   const [timeModalVisible, setTimeModalVisible] = useState(false);
@@ -34,96 +54,30 @@ const SearchPage = ({navigation}) => {
   const [selectedMinute, setSelectedMinute] = useState('');
   const [selectedEngCategory, setSelectedEngCategory] = useState('');
   const [searchStoreName, setSearchStoreName] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const [location, setLocation] = useState(null);
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
   const [stores, setStores] = useState([]);
   const [fastSearchStores, setfastSearchStores] = useState([]);
-  const [searchStores, setSearchStores] = useState([]);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    requestLocationPermission();
-  }, []);
 
   useEffect(() => {
     if (location) {
       // 위치가 업데이트되면 매장 정보를 가져옵니다.
       getStoreData();
     } else {
-      console.log('fail');
+      console.log('getStoreData fail');
     }
   }, [location]);
 
   useEffect(() => {
     if (selectedCategory && selectedPeople && selectedHour && selectedMinute) {
       onPressFastSearch();
-    } else {
-      console.log('search fail');
     }
   }, [selectedCategory, selectedPeople, selectedHour, selectedMinute]);
   //빠른 검색 엔진
 
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('You can use the location');
-          fetchLocation(); // 권한 허용 후 위치 가져오기
-        } else {
-          console.log('Location permission denied');
-          setError('위치 권한이 거부되었습니다.');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      fetchLocation(); // iOS에서는 권한 요청 없이 바로 위치 가져오기
-    }
-  };
-
-  const fetchLocation = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-
-        setLocation({latitude, longitude});
-        setLatitude(latitude);
-        setLongitude(longitude);
-        setError(null);
-      },
-      error => {
-        console.error(error);
-        if (error.code === 1) {
-          setError('위치 권한이 거부되었습니다.');
-        } else if (error.code === 2) {
-          setError('위치 정보를 사용할 수 없습니다.');
-        } else if (error.code === 3) {
-          setError('위치 요청이 시간 초과되었습니다.');
-        } else if (error.code === 4) {
-          setError('위치 서비스가 비활성화되었습니다.');
-        } else {
-          setError('알 수 없는 오류가 발생했습니다.');
-        }
-      },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-    );
-  };
-
   const getStoreData = () => {
     if (!location) return;
-
     const {latitude, longitude} = location;
 
     fetch(
@@ -289,7 +243,11 @@ const SearchPage = ({navigation}) => {
       </View>
 
       {/* 스크롤 가능한 영역 */}
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }>
         <View style={styles.fastSearch}>
           <Text style={styles.fastSearchText}>내 주변 빠른 검색</Text>
         </View>

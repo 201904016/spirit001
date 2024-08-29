@@ -20,8 +20,6 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
 const MapPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
   const [error, setError] = useState(null);
 
   const [stores, setStores] = useState([]);
@@ -73,8 +71,6 @@ const MapPage = ({navigation}) => {
         const {latitude, longitude} = position.coords;
 
         setLocation({latitude, longitude});
-        setLatitude(latitude);
-        setLongitude(longitude);
         setError(null);
         updateMap(latitude, longitude, stores); // 위치 정보 업데이트 후 지도 갱신
       },

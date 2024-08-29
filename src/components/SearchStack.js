@@ -5,7 +5,7 @@ import SearchStorePage from '../pages/Bottomtab/SearchStorePage';
 
 const Stack = createStackNavigator();
 
-export default function MapStack() {
+export default function SearchStack() {
   return (
     <Stack.Navigator initialRouteName="Test1">
       <Stack.Screen

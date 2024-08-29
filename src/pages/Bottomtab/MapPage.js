@@ -16,6 +16,8 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import MapCategory from '../../hooks/MapCategory';
 
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
+
 const MapPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
   const [latitude, setLatitude] = useState(null);
@@ -212,7 +214,8 @@ const MapPage = ({navigation}) => {
         onMessage={event => {
           const message = event.nativeEvent.data;
           if (message === 'mapClicked') {
-            setSelectedStore(null); // 지도 클릭 시 가게 정보 숨기기
+            // 지도 클릭 시 가게 정보 숨기기
+            setSelectedStore(null);
           } else {
             const store = JSON.parse(message);
             setSelectedStore(store);
@@ -222,46 +225,63 @@ const MapPage = ({navigation}) => {
       <Pressable
         style={styles.buttonTop}
         onPress={() => navigation.navigate(SearchPage)}>
-        <Text style={styles.buttonTextTop}>장소, 지역 검색</Text>
+        <View style={styles.searchBar}>
+          <EvilIcons
+            style={styles.searchIcon}
+            name="search"
+            size={27}
+            color={'gray'}
+          />
+          <Text style={styles.buttonTextTop}>근처 주점들을 검색해보세요.</Text>
+        </View>
       </Pressable>
       <Pressable style={styles.buttonBottom} onPress={updateLocation}>
         <Feather name="crosshair" size={30} color="gray" />
       </Pressable>
 
       {selectedStore && (
-        <Pressable>
-          <View style={styles.storeInfo}>
-            <Image
-              source={require('../../assets/kim.png')}
-              style={styles.storeImage}
-            />
-            <View style={styles.titletopview}>
-              <View style={styles.titleview}>
-                <Text style={styles.storeName}>{selectedStore.storeName}</Text>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <FontAwesomeIcon name="star" size={15} color="#FCC104" />
-                  <Text style={styles.storeAddress}>
-                    {selectedStore.storeRate}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.category}>
-                {selectedStore.categories.slice(0, 3).map((category, index) => (
-                  <MapCategory
-                    key={index}
-                    categories={[category]}
-                    style={styles.StoreCategory}
-                  />
-                ))}
-              </View>
-              <View style={styles.timeview}>
-                <Text style={styles.timeviewtext}>
-                  영업종료 {selectedStore.closeHour.slice(0, 5)}
+        <Pressable
+          style={styles.storeInfo}
+          onPress={() =>
+            navigation.navigate('StoreStack', {
+              screen: 'StoreMainPage',
+              params: {
+                storeId: selectedStore.storeId,
+                innerlatitude: selectedStore.latitude,
+                innerlongitude: selectedStore.longitude,
+              },
+            })
+          }>
+          <Image
+            source={require('../../assets/kim.png')}
+            style={styles.storeImage}
+          />
+          <View style={styles.titletopview}>
+            <View style={styles.titleview}>
+              <Text style={styles.storeName}>{selectedStore.storeName}</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <FontAwesomeIcon name="star" size={15} color="#FCC104" />
+                <Text style={styles.storeAddress}>
+                  {selectedStore.storeRate}
                 </Text>
               </View>
-              <Text style={styles.menutext}>대표메뉴 : 스케쥴 기미</Text>
             </View>
+
+            <View style={styles.category}>
+              {selectedStore.categories.slice(0, 3).map((category, index) => (
+                <MapCategory
+                  key={index}
+                  categories={[category]}
+                  style={styles.StoreCategory}
+                />
+              ))}
+            </View>
+            <View style={styles.timeview}>
+              <Text style={styles.timeviewtext}>
+                영업종료 {selectedStore.closeHour.slice(0, 5)}
+              </Text>
+            </View>
+            <Text style={styles.menutext}>대표메뉴 : 스케쥴 기미</Text>
           </View>
         </Pressable>
       )}
@@ -281,6 +301,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'black',
     marginRight: 5,
+  },
+  searchBar: {
+    width: '100%',
+    flexDirection: 'row',
+    alignSelf: 'center',
   },
   buttonTop: {
     position: 'absolute',
@@ -314,13 +339,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonTextTop: {
-    color: 'black',
+    color: 'gray',
     backgroundColor: 'white',
     fontSize: 16,
     borderRadius: 100,
     width: '100%',
     left: '3%',
     textAlign: 'left',
+    marginLeft: 5,
   },
   storeInfo: {
     flexDirection: 'row',

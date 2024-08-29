@@ -5,7 +5,7 @@ import {getToken} from '../../store/Storage';
 import {ScrollView} from 'react-native-gesture-handler';
 import MapCategory from '../../hooks/MapCategory';
 
-const LikePage = () => {
+const LikePage = ({navigation}) => {
   const [token, setToken] = useState(null);
   const [stores, setStores] = useState([]);
 
@@ -37,6 +37,7 @@ const LikePage = () => {
         .then(data => {
           if (data && data.data) {
             setStores(data.data); // 데이터 저장
+            console.log('data succ');
           }
         })
         .catch(error => console.error('Error:', error));
@@ -47,9 +48,20 @@ const LikePage = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        {stores.map((store, index) => (
-          <Pressable key={index}>
+      <ScrollView contentContainerStyle={styles.ScrollView}>
+        {stores.map(store => (
+          <Pressable
+            key={store.storeId}
+            onPress={() =>
+              navigation.navigate('StoreStack', {
+                screen: 'StoreMainPage',
+                params: {
+                  storeId: store.storeId,
+                  innerlatitude: store.latitude,
+                  innerlongitude: store.longitude,
+                },
+              })
+            }>
             <View style={styles.storeInfo}>
               <Image
                 source={require('../../assets/kim.png')}
@@ -78,7 +90,7 @@ const LikePage = () => {
                   ))}
                 </View>
                 <Text style={styles.StoreClose}>
-                  영업 종료 {store.closeHour}
+                  영업 종료 {store.closeHour.slice(0, 5)}
                 </Text>
                 <Text style={styles.StoreMain}>대표 메뉴: </Text>
               </View>
@@ -113,6 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     marginHorizontal: '5%',
+    marginTop: 5,
     padding: 15,
     borderRadius: 12,
     shadowColor: '#000',
@@ -135,7 +148,10 @@ const styles = StyleSheet.create({
   scoretext: {
     marginLeft: 3,
   },
-
+  ScrollView: {
+    marginTop: 10,
+    paddingBottom: 30,
+  },
   StoreTitle: {
     fontWeight: 'bold',
     fontSize: 20,

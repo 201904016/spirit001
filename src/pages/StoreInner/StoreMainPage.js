@@ -165,12 +165,15 @@ const StoreMainPage = ({navigation}) => {
           style={styles.backimage}
           imageStyle={styles.backimagestyle}>
           <View style={styles.MainIconsView}>
-            <FontAwesomeIcon
-              name={'angle-left'}
-              size={25}
-              color={'gray'}
-              style={styles.searchicon}
-            />
+            <Pressable onPress={() => navigation.goBack()}>
+              <FontAwesomeIcon
+                name={'angle-left'}
+                size={25}
+                color={'gray'}
+                style={styles.searchicon}
+              />
+            </Pressable>
+
             <Pressable onPress={() => navigation.navigate('MainPage')}>
               <Ionicons
                 name={'home-outline'}

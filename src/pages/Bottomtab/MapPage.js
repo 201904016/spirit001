@@ -17,18 +17,24 @@ import Feather from 'react-native-vector-icons/Feather';
 import MapCategory from '../../hooks/MapCategory';
 
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import {getLocation, saveLocation} from '../../store/useLocation';
 
 const MapPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      const currentLocation = await getLocation(); // 캐시된 위치 가져오기
+      setLocation(currentLocation);
+    };
+    fetchLocation();
+  }, []);
+
   const [error, setError] = useState(null);
 
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState(null); // 선택된 가게 상태
   const webViewRef = useRef(null);
-
-  useEffect(() => {
-    requestLocationPermission();
-  }, []);
 
   useEffect(() => {
     if (location) {
@@ -37,34 +43,6 @@ const MapPage = ({navigation}) => {
     }
   }, [location]);
 
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('You can use the location');
-          fetchLocation(); // 권한 허용 후 위치 가져오기
-        } else {
-          console.log('Location permission denied');
-          setError('위치 권한이 거부되었습니다.');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      fetchLocation(); // iOS에서는 권한 요청 없이 바로 위치 가져오기
-    }
-  };
-
   const fetchLocation = () => {
     Geolocation.getCurrentPosition(
       position => {
@@ -72,6 +50,7 @@ const MapPage = ({navigation}) => {
 
         setLocation({latitude, longitude});
         setError(null);
+        saveLocation({latitude, longitude});
         updateMap(latitude, longitude, stores); // 위치 정보 업데이트 후 지도 갱신
       },
       error => {

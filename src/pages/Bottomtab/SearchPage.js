@@ -34,6 +34,15 @@ const SearchPage = ({navigation}) => {
     fetchLocation();
   }, []);
 
+  useEffect(() => {
+    if (location) {
+      // 위치가 업데이트되면 매장 정보를 가져옵니다.
+      getStoreData();
+    } else {
+      console.log('getStoreData fail');
+    }
+  }, [location]);
+
   const onRefresh = async () => {
     const currentLocation = await useLocation(); // 캐시된 위치 가져오기
     console.log(location);
@@ -59,15 +68,6 @@ const SearchPage = ({navigation}) => {
   const [stores, setStores] = useState([]);
   const [fastSearchStores, setfastSearchStores] = useState([]);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (location) {
-      // 위치가 업데이트되면 매장 정보를 가져옵니다.
-      getStoreData();
-    } else {
-      console.log('getStoreData fail');
-    }
-  }, [location]);
 
   useEffect(() => {
     if (selectedCategory && selectedPeople && selectedHour && selectedMinute) {

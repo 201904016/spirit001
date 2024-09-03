@@ -53,8 +53,8 @@ const StoreMainPage = ({navigation}) => {
   const [address, setAddress] = useState('');
   const [openHour, setOpenHour] = useState('');
   const [closepenHour, setCloseHour] = useState('');
-  const [longitude, setIongitude] = useState('');
-  const [lititude, setLititude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [latitude, setLatitude] = useState('');
   const [storeContent, setStoreContent] = useState('');
   const [storeRate, setStoreRate] = useState('');
   const [reviewCount, setReviewCount] = useState('');
@@ -125,6 +125,7 @@ const StoreMainPage = ({navigation}) => {
 
   const getStoreData = token => {
     console.log(token);
+    console.log(innerlatitude, innerlongitude, storeId);
     fetch(
       `http://kymokim.iptime.org:11082/api/store/get/${storeId}?latitude=${innerlatitude}&longitude=${innerlongitude}`,
       {
@@ -138,14 +139,15 @@ const StoreMainPage = ({navigation}) => {
       .then(response => response.json())
       .then(data => {
         const storeData = data.data || {}; // 데이터가 없으면 빈 객체로 초기화
+        console.log(data);
         const categories = storeData.categories || []; // categories가 없으면 빈 배열로 초기화
         setStoreName(storeData.storeName || '');
         setCategorys(categories);
         setAddress(storeData.address || '');
         setOpenHour(storeData.openHour || '');
         setCloseHour(storeData.closeHour || '');
-        setIongitude(storeData.longitude || '');
-        setLititude(storeData.latitude || '');
+        setLongitude(storeData.longitude || '');
+        setLatitude(storeData.latitude || '');
         setStoreRate(storeData.storeRate || '');
         setReviewCount(storeData.reviewCount || '');
         setStoreLikeCount(storeData.storeLikeCount || '');
@@ -268,7 +270,17 @@ const StoreMainPage = ({navigation}) => {
         </Pressable>
         <Pressable
           style={styles.StoreButton}
-          onPress={() => changePage('StoreMapPage')}>
+          onPress={() =>
+            navigation.navigate('StoreStack', {
+              screen: 'StoreMap',
+              params: {
+                storeLatitude: latitude,
+                storeLongitude: longitude,
+                innerlatitude: innerlatitude,
+                innerlongitude: innerlongitude,
+              },
+            })
+          }>
           <Text style={styles.StoreButtonText}>길찾기</Text>
         </Pressable>
       </View>
@@ -309,7 +321,14 @@ const StoreMainPage = ({navigation}) => {
           <StoreRiviewPage navigation={navigation} />
         )}
         {currentPage === 'StoreMapPage' && (
-          <StoreMapPage navigation={navigation} />
+          <StoreMapPage
+            navigation={navigation}
+            storeId={storeId}
+            storeLatitude={latitude}
+            storeLongitude={longitude}
+            innerlatitude={innerlatitude}
+            innerlongitude={innerlongitude}
+          />
         )}
       </View>
     </ScrollView>
@@ -317,6 +336,9 @@ const StoreMainPage = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  secondeView: {
+    flex: 1,
+  },
   StoreTopView: {
     width: '100%',
     alignItems: 'center',

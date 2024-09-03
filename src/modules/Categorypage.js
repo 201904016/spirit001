@@ -67,8 +67,8 @@ const Categoryspage = ({navigation, categoryname}) => {
               screen: 'StoreMainPage',
               params: {
                 storeId: store.storeId,
-                innerlatitude: store.latitude,
-                innerlongitude: store.longitude,
+                innerlatitude: location.latitude,
+                innerlongitude: location.longitude,
               },
             })
           }>

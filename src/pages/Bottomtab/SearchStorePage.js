@@ -24,7 +24,6 @@ const SearchStorePage = ({navigation}) => {
 
   useEffect(() => {
     if (searchWord) {
-      // 위치가 업데이트되면 매장 정보를 가져옵니다.
       filteredStores();
     } else {
       console.log('fail');

@@ -7,6 +7,7 @@ import CommonRiviewPage from '../pages/StoreInner/CommonRiviewPage';
 import ReceiptRiviewPage from '../pages/StoreInner/ReceiptRiviewPage';
 import UpdateMenu from '../pages/StoreInner/UpdateMenu';
 import UpdateStore from '../pages/StoreInner/UpdateStore';
+import StoreMapPage from '../pages/StoreInner/StoreMapPage';
 
 const Stack = createStackNavigator();
 
@@ -42,6 +43,11 @@ export default function StoreStack() {
         name="UpdateStore"
         component={UpdateStore}
         options={{title: '매장 수정하기'}}
+      />
+      <Stack.Screen
+        name="StoreMap"
+        component={StoreMapPage}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

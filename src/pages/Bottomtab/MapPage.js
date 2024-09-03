@@ -1,14 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  Platform,
-  PermissionsAndroid,
-  Pressable,
-  Text,
-  View,
-  Image,
-} from 'react-native';
+import {StyleSheet, Pressable, Text, View, Image} from 'react-native';
 import {WebView} from 'react-native-webview';
 import Geolocation from '@react-native-community/geolocation';
 import SearchPage from './SearchPage';
@@ -21,14 +12,6 @@ import {getLocation, saveLocation} from '../../store/useLocation';
 
 const MapPage = ({navigation}) => {
   const [location, setLocation] = useState(null);
-
-  useEffect(() => {
-    const fetchLocation = async () => {
-      const currentLocation = await getLocation(); // 캐시된 위치 가져오기
-      setLocation(currentLocation);
-    };
-    fetchLocation();
-  }, []);
 
   const [error, setError] = useState(null);
 
@@ -186,6 +169,7 @@ const MapPage = ({navigation}) => {
         javaScriptEnabled={true}
         domStorageEnabled={true}
         startInLoadingState={true}
+        onLoadEnd={fetchLocation}
         onMessage={event => {
           const message = event.nativeEvent.data;
           if (message === 'mapClicked') {
@@ -222,8 +206,8 @@ const MapPage = ({navigation}) => {
               screen: 'StoreMainPage',
               params: {
                 storeId: selectedStore.storeId,
-                innerlatitude: selectedStore.latitude,
-                innerlongitude: selectedStore.longitude,
+                innerlatitude: location.latitude,
+                innerlongitude: location.longitude,
               },
             })
           }>
@@ -307,7 +291,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 10,
+    padding: 5,
   },
   buttonText: {
     color: 'white',

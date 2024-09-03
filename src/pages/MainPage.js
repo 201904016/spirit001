@@ -122,6 +122,9 @@ const MainPage = ({navigation}) => {
     if (index === 0) {
       navigation.navigate(StoreaddPage);
     }
+    if (index === 2) {
+      navigation.navigate('MapPage');
+    }
   };
 
   const handlestoreItemOut = () => {

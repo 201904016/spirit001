@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {StyleSheet, Pressable, Text, View, Image} from 'react-native';
+import {StyleSheet, Pressable, Text, View, Image, Modal} from 'react-native';
 import {WebView} from 'react-native-webview';
 import Geolocation from '@react-native-community/geolocation';
 import SearchPage from '../Bottomtab/SearchPage';
@@ -18,6 +18,15 @@ const StoreMapPage = ({navigation}) => {
     route.params;
 
   const [location, setLocation] = useState({innerlatitude, innerlongitude});
+  const [isWebModalVisible, setWebModalVisible] = useState(false);
+
+  const openWebModal = () => {
+    setWebModalVisible(true);
+  };
+
+  const closeWebModal = () => {
+    setWebModalVisible(false);
+  };
 
   const tempStoreLat = 37.2702;
   const tempStoreLong = 127.126;
@@ -187,20 +196,23 @@ const StoreMapPage = ({navigation}) => {
         pointerEvents="none"
         onLoadEnd={storeUpdateMap} // 로딩이 끝난 후에 storeUpdateMap 호출
       />
-      <View style={styles.titleView}>
-        <View style={styles.searchBar}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <FontAwesomeIcon
-              name={'angle-left'}
-              size={30}
-              color={'gray'}
-              style={styles.searchicon}
-            />
-          </Pressable>
-        </View>
+
+      <View style={styles.goBackButton}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <FontAwesomeIcon
+            name={'angle-left'}
+            size={30}
+            color={'gray'}
+            style={styles.searchicon}
+          />
+        </Pressable>
       </View>
+
       <Pressable style={styles.buttonBottom} onPress={updateLocation}>
-        <Feather name="crosshair" size={30} color="gray" />
+        <Feather name="crosshair" size={30} color="#16BBFF" />
+      </Pressable>
+      <Pressable style={styles.buttonRoute} onPress={openWebModal}>
+        <Ionicons name="navigate" size={30} color="#16BBFF" />
       </Pressable>
       <Pressable onPress={storeUpdateMap}>
         <View style={styles.storeInfo}>
@@ -234,6 +246,28 @@ const StoreMapPage = ({navigation}) => {
           </View>
         </View>
       </Pressable>
+      <Modal
+        visible={isWebModalVisible}
+        animationType="slide"
+        transparent={true}>
+        <View style={styles.container}>
+          <WebView
+            source={{
+              uri: `https://map.kakao.com/link/map/${tempStoreLat},${tempStoreLong}`,
+            }} // 열고 싶은 웹페이지의 URL
+          />
+        </View>
+        <View style={styles.goBackButton2}>
+          <Pressable onPress={closeWebModal}>
+            <FontAwesomeIcon
+              name={'angle-left'}
+              size={30}
+              color={'gray'}
+              style={styles.searchicon}
+            />
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -245,6 +279,20 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
   },
+  modalContainer: {
+    width: '90%',
+    paddingVertical: 5,
+    paddingTop: 5,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
   StoreCategory: {
     top: 1,
     fontSize: 15,
@@ -255,24 +303,63 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
   },
-  titleView: {
+  goBackButton: {
     position: 'absolute',
     top: '3%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    shadowRadius: 2,
     left: '7%',
-  },
-  buttonBottom: {
-    position: 'absolute',
-    bottom: '40%',
-    left: '7%',
-    backgroundColor: 'white',
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 5,
+    padding: 10,
+    shadowColor: 'gray',
+    elevation: 0.001,
+  },
+  goBackButton2: {
+    position: 'absolute',
+    bottom: '10%',
+    left: '3%',
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    backgroundColor: 'white',
+
+    // 그림자 설정
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4}, // 아래쪽으로 더 깊은 그림자
+    shadowOpacity: 0.3, // 그림자의 투명도
+    shadowRadius: 6, // 그림자의 퍼짐 정도
+    elevation: 12, // 안드로이드 그림자 효과
+
+    // 테두리 설정
+    borderWidth: 1,
+    borderColor: '#ccc',
+
+    // 그라디언트 효과 (배경이 단일 색상이 아닌 경우)
+    backgroundColor: '#fdfdfd',
+  },
+
+  buttonBottom: {
+    position: 'absolute',
+    bottom: '30%',
+    left: '7%',
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    shadowColor: '#16BBFF',
+    elevation: 0.001,
+  },
+  buttonRoute: {
+    position: 'absolute',
+    bottom: '30%',
+    right: '7%',
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    shadowColor: '#16BBFF',
+    elevation: 0.001,
   },
   buttonText: {
     color: 'white',
@@ -289,10 +376,10 @@ const styles = StyleSheet.create({
   },
   storeInfo: {
     flexDirection: 'row',
-    width: '80%',
-    left: '10%',
+    width: '90%',
+    left: '5%',
     position: 'absolute',
-    bottom: 60,
+    bottom: 100,
     backgroundColor: '#fff',
     padding: 15,
     borderRadius: 12,

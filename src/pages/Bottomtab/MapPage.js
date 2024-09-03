@@ -195,7 +195,7 @@ const MapPage = ({navigation}) => {
         </View>
       </Pressable>
       <Pressable style={styles.buttonBottom} onPress={updateLocation}>
-        <Feather name="crosshair" size={30} color="gray" />
+        <Feather name="crosshair" size={30} color="#16BBFF" />
       </Pressable>
 
       {selectedStore && (
@@ -282,16 +282,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+
+    // 그라디언트 효과 (배경이 단일 색상이 아닌 경우)
+    backgroundColor: '#fdfdfd',
   },
   buttonBottom: {
     position: 'absolute',
     bottom: '25%',
     left: '10%',
-    backgroundColor: 'white',
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 5,
+    padding: 10,
+    shadowColor: '#16BBFF',
+    elevation: 0.001,
   },
   buttonText: {
     color: 'white',
@@ -299,7 +305,6 @@ const styles = StyleSheet.create({
   },
   buttonTextTop: {
     color: 'gray',
-    backgroundColor: 'white',
     fontSize: 16,
     borderRadius: 100,
     width: '100%',
@@ -321,6 +326,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+
+    // 그라디언트 효과 (배경이 단일 색상이 아닌 경우)
+    backgroundColor: '#fdfdfd',
   },
   titletopview: {
     flex: 1,
